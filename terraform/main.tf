@@ -72,6 +72,39 @@ module "step_function" {
   type = "STANDARD"
 }
 
+module "zones" {
+  source = "terraform-aws-modules/route53/aws/modules/zones"
+
+  zones = {
+    "clash-bot-workflow-${var.environment}.api.ninja" = {
+      comment = "clash-bot-workflow-${var.environment}.api.ninja (${var.environment})"
+      tags = {
+        env = var.environment
+      }
+    }
+  }
+
+  tags = {
+    ManagedBy = "Terraform"
+  }
+}
+
+module "acm" {
+  source  = "terraform-aws-modules/acm/aws"
+  version = "~> 4.0"
+
+  domain_name = "clash-bot-workflow-${var.environment}.api.ninja"
+  zone_id     = module.zones.route53_zone_zone_id[0]
+
+  validation_method = "EMAIL"
+
+  subject_alternative_names = [
+    var.domain_name
+  ]
+
+  wait_for_validation = true
+}
+
 module "api_gateway" {
   source = "terraform-aws-modules/apigateway-v2/aws"
 
@@ -86,8 +119,8 @@ module "api_gateway" {
   }
 
   # Custom domain
-  # domain_name = "clash-bot-workflow-${var.environment}.api"
-  # domain_name_certificate_arn = "arn:aws:acm:eu-west-1:052235179155:certificate/2b3a7ed9-05e1-4f9e-952b-27744ba06da6"
+  domain_name                 = "clash-bot-workflow-${var.environment}.api.ninja"
+  domain_name_certificate_arn = module.acm.acm_certificate_arn
 
   # Access logs
   default_stage_access_log_format = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
