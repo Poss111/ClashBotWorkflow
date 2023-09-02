@@ -38,7 +38,7 @@ module "dynamodb_table" {
     },
     {
       name = "teamDetails",
-      type = "M"
+      type = "S"
     },
     {
       name = "teamName"
