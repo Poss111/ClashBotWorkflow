@@ -10,7 +10,7 @@ on:
 
 jobs:
   terraform:
-    name: 'Terraform Plan'
+    name: 'Terraform Apply'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -49,33 +49,33 @@ jobs:
           role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
           aws-region: us-east-1
 
-      - name: Terraform Plan
-        id: plan
+      - name: Terraform Apply
+        id: apply
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: "us-east-1"
           TF_VAR_release_title: "PR Build"
-        run: terraform plan -no-color -input=false
+        run: terraform apply -no-color -input=false
         continue-on-error: true
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `Clash Bot Webapp Workspace - Plan
+            const output = `Clash Bot Webapp Workspace - apply
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+            <details><summary>Show Apply</summary>
 
             \`\`\`\n
-            ${process.env.PLAN}
+            ${process.env.APPLY}
             \`\`\`
 
             </details>
