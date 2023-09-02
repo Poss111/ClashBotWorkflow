@@ -57,7 +57,7 @@ jobs:
           TF_VAR_release_title: "PR Build"
         run: |
           terraform workspace show
-          terraform apply -no-color -auto-approve -input=false
+          terraform destroy -no-color -auto-approve -input=false
         continue-on-error: true
 
       - name: Update Pull Request
