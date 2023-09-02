@@ -56,8 +56,9 @@ jobs:
           TF_VAR_region: "us-east-1"
           TF_VAR_release_title: "PR Build"
         run: |
+          terraform workspace select ClashBotWorkflow
           terraform workspace show
-          terraform apply -no-color -input=false
+          terraform apply -no-color -auto-approve -input=false
         continue-on-error: true
 
       - name: Update Pull Request
