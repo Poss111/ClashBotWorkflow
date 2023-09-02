@@ -72,21 +72,8 @@ module "step_function" {
   type = "STANDARD"
 }
 
-module "zones" {
-  source = "terraform-aws-modules/route53/aws//modules/zones"
-
-  zones = {
-    "clash-bot-workflow-${var.environment}.api.ninja" = {
-      comment = "clash-bot-workflow-${var.environment}.api.ninja (${var.environment})"
-      tags = {
-        env = var.environment
-      }
-    }
-  }
-
-  tags = {
-    ManagedBy = "Terraform"
-  }
+resource "aws_route53_zone" "this" {
+  name = "clash-bot-workflow-${var.environment}.api.ninja"
 }
 
 module "acm" {
@@ -94,12 +81,12 @@ module "acm" {
   version = "~> 4.0"
 
   domain_name = "clash-bot-workflow-${var.environment}.api.ninja"
-  zone_id     = module.zones.route53_zone_zone_id
+  zone_id     = aws_route53_zone.this.zone_id
 
   validation_method = "EMAIL"
 
   subject_alternative_names = [
-    "clash-bot-workflow-${var.environment}.api.ninja"
+    "clash-bot-workflow-*.api.ninja"
   ]
 
   wait_for_validation = true
