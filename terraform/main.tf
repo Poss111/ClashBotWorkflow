@@ -9,6 +9,17 @@ provider "aws" {
   }
 }
 
+terraform {
+  backend "remote" {
+    organization = "ClashBot"
+
+    workspaces {
+      name = "ClashBotWorkflow"
+    }
+  }
+}
+
+
 module "dynamodb_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
