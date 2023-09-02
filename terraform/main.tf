@@ -94,7 +94,7 @@ module "acm" {
   version = "~> 4.0"
 
   domain_name = "clash-bot-workflow-${var.environment}.api.ninja"
-  zone_id     = module.zones.route53_zone_zone_id[0]
+  zone_id     = module.zones.route53_zone_zone_id
 
   validation_method = "EMAIL"
 
