@@ -13,9 +13,10 @@ module "dynamodb_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
   name           = "clash-teams"
-  hash_key       = "id"
+  hash_key       = "teamId"
   billing_mode   = "PROVISIONED"
   write_capacity = 5
+  read_capacity  = 1
 
   #   private TeamId teamId;
   #     private String id;
@@ -34,26 +35,6 @@ module "dynamodb_table" {
   attributes = [
     {
       name = "teamId"
-      type = "S"
-    },
-    {
-      name = "teamDetails",
-      type = "S"
-    },
-    {
-      name = "teamName"
-      type = "S"
-    },
-    {
-      name = "serverId"
-      type = "N"
-    },
-    {
-      name = "teamIconLink"
-      type = "S"
-    },
-    {
-      name = "positions"
       type = "S"
     }
   ]
