@@ -1,5 +1,12 @@
 provider "aws" {
   region = var.region
+
+  default_tags {
+    tags = {
+      Application = "ClashBot"
+      Environment = var.environment
+    }
+  }
 }
 
 module "dynamodb_table" {
@@ -27,6 +34,10 @@ module "dynamodb_table" {
   attributes = [
     {
       name = "teamId"
+      type = "S"
+    },
+    {
+      name = "teamDetails",
       type = "M"
     },
     {
@@ -43,7 +54,7 @@ module "dynamodb_table" {
     },
     {
       name = "positions"
-      type = "L"
+      type = "S"
     }
   ]
 }
