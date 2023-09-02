@@ -12,7 +12,7 @@ provider "aws" {
 module "dynamodb_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name           = "clash-teams-${var.enviroment}"
+  name           = "clash-teams-${var.environment}"
   hash_key       = "teamId"
   billing_mode   = "PROVISIONED"
   write_capacity = 5
@@ -43,7 +43,7 @@ module "dynamodb_table" {
 module "step_function" {
   source = "terraform-aws-modules/step-functions/aws"
 
-  name       = "retrieve-teams-${var.enviroment}"
+  name       = "retrieve-teams-${var.environment}"
   definition = <<EOF
   {
     "Comment": "A Hello World example of the Amazon States Language using Pass states",
@@ -75,7 +75,7 @@ module "step_function" {
 module "api_gateway" {
   source = "terraform-aws-modules/apigateway-v2/aws"
 
-  name          = "clash-bot-workflow-${var.enviroment}"
+  name          = "clash-bot-workflow-${var.environment}"
   description   = "Clash Bot Workflow API Gateway for the ${var.environment} environment"
   protocol_type = "HTTP"
 
