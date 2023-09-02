@@ -73,7 +73,7 @@ module "step_function" {
 }
 
 module "zones" {
-  source = "terraform-aws-modules/route53/aws/modules/zones"
+  source = "terraform-aws-modules/route53/aws//modules/zones"
 
   zones = {
     "clash-bot-workflow-${var.environment}.api.ninja" = {
