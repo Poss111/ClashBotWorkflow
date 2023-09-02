@@ -14,7 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform
+        working-directory: terraform    
+    permissions:
+      id-token: write
+      contents: read
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
