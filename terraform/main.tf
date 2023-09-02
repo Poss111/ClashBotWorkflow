@@ -91,13 +91,13 @@ module "acm" {
   source  = "terraform-aws-modules/acm/aws"
   version = "~> 4.0"
 
-  domain_name = "clash-bot-workflow-${var.environment}.api.ninja"
+  domain_name = "${var.environment}.clash-bot-workflow.api.ninja"
   zone_id     = aws_route53_zone.this.zone_id
 
   validation_method = "EMAIL"
 
   subject_alternative_names = [
-    "clash-bot-workflow-*.api.ninja"
+    "*.clash-bot-workflow.api.ninja"
   ]
 
   wait_for_validation = true
@@ -117,7 +117,7 @@ module "api_gateway" {
   }
 
   # Custom domain
-  domain_name                 = "clash-bot-workflow-${var.environment}.api.ninja"
+  domain_name                 = "${var.environment}.clash-bot-workflow.api.ninja"
   domain_name_certificate_arn = module.acm.acm_certificate_arn
 
   # Access logs
