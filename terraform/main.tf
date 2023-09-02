@@ -99,7 +99,7 @@ module "acm" {
   validation_method = "EMAIL"
 
   subject_alternative_names = [
-    var.domain_name
+    "clash-bot-workflow-${var.environment}.api.ninja"
   ]
 
   wait_for_validation = true
