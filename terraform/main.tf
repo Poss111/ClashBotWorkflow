@@ -83,24 +83,9 @@ module "step_function" {
   type = "STANDARD"
 }
 
-resource "aws_route53_zone" "this" {
-  name = "clash-bot-workflow-${var.environment}.api.ninja"
-}
-
-module "acm" {
-  source  = "terraform-aws-modules/acm/aws"
-  version = "~> 4.0"
-
-  domain_name = "${var.environment}.clash-bot-workflow.api.ninja"
-  zone_id     = aws_route53_zone.this.zone_id
-
-  validation_method = "EMAIL"
-
-  subject_alternative_names = [
-    "*.clash-bot-workflow.api.ninja"
-  ]
-
-  wait_for_validation = true
+data "aws_acm_certificate" "issued" {
+  domain   = "clash-bot.ninja"
+  statuses = ["ISSUED"]
 }
 
 module "api_gateway" {
@@ -117,8 +102,8 @@ module "api_gateway" {
   }
 
   # Custom domain
-  domain_name                 = "${var.environment}.clash-bot-workflow.api.ninja"
-  domain_name_certificate_arn = module.acm.acm_certificate_arn
+  domain_name                 = "${var.environment}.clash-bot.ninja"
+  domain_name_certificate_arn = data.aws_acm_certificate.arn
 
   # Access logs
   default_stage_access_log_format = "$context.identity.sourceIp - - [$context.requestTime] \"$context.httpMethod $context.routeKey $context.protocol\" $context.status $context.responseLength $context.requestId $context.integrationErrorMessage"
