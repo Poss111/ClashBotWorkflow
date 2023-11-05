@@ -34,5 +34,5 @@ variable "sqs_batch_size" {
 variable "dynamodb_table_arn" {
   type        = string
   description = "arn of the dynamodb table."
-  
+
 }
