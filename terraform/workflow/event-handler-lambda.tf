@@ -2,12 +2,12 @@ resource "aws_lambda_function" "event_handler_lambda" {
   function_name = "clash-bot-event-handler"
   handler       = "handler.handler"
   runtime       = "nodejs16.x"
-  role          = aws_iam_role.lambda_exec.arn
+  role          = aws_iam_role.lambda_handler_exec.arn
 
   s3_bucket = data.aws_s3_bucket.lambda_bucket.id
   s3_key    = "${var.environment}/${var.event_handler_artifact_name}.zip}"
 
-  source_code_hash = filebase64sha256("${event_handler_artifact_name}.zip")
+  source_code_hash = filebase64sha256("${var.event_handler_artifact_name}.zip")
 
   environment {
     variables = {

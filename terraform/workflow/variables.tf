@@ -30,3 +30,9 @@ variable "sqs_batch_size" {
   default     = 1
   description = "value of the batch size for the sqs trigger."
 }
+
+variable "dynamodb_table_arn" {
+  type        = string
+  description = "arn of the dynamodb table."
+  
+}
