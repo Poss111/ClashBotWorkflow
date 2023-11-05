@@ -51,7 +51,7 @@ module "api_gateway" {
   # Routes and integrations
   integrations = {
     "$default" = {
-      step_function_arn = module.step_function.state_machine_arn
+      lambda = aws_lambda_function.event_publisher_lambda.arn
     }
   }
 }
