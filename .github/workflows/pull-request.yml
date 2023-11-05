@@ -28,7 +28,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Build shared archive
-        working-directory: ../shared
+        working-directory: ./functions/clash-bot/shared
         run: |
           npm install
           npm run build
