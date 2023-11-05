@@ -31,7 +31,7 @@ jobs:
         working-directory: ./functions/clash-bot/shared
         run: |
           npm install
-          npm run build
+          npx tsc
           npm pack
       
       - name: Install dependencies and link
