@@ -1,0 +1,29 @@
+{
+  "name": "clash-bot-shared",
+  "version": "1.0.0",
+  "description": "A shared module for all of the clash bot workflow functions.",
+  "main": "prod/index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "keywords": [
+    "clash-bot",
+    "clash-bot-workflow",
+    "shared"
+  ],
+  "author": "Poss111",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/jest": "^29.5.4",
+    "@types/pino": "^7.0.5",
+    "jest": "^29.6.4",
+    "pino-pretty": "^10.2.0",
+    "ts-jest": "^29.1.1",
+    "ts-mockito": "^2.6.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "pino": "^8.15.0"
+  }
+}

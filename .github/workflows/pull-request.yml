@@ -9,84 +9,205 @@ on:
       - '**/.gitignore'
 
 jobs:
-  terraform:
-    name: 'Terraform Apply'
+  eventPublisher:
+    name: Event Publisher Lambda
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: terraform    
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-
+        working-directory: ./functions/clash-bot/event-publisher
+    
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v2
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
-
-      - name: Terraform Init
-        id: init
-        run: terraform init
-
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
-      - name: Terraform Apply
-        id: apply
-        if: github.event_name == 'pull_request'
-        env:
-          TF_VAR_region: "us-east-1"
-          TF_VAR_release_title: "PR Build"
+      - name: Build shared archive
+        working-directory: ../shared
         run: |
-          terraform workspace show
-          terraform apply -no-color -auto-approve -input=false
-        continue-on-error: true
+          npm install
+          npm run build
+          npm pack
+      
+      - name: Install dependencies and link
+        run: |
+          npm install
+          npx link clash-bot-shared
 
-      - name: Update Pull Request
-        uses: actions/github-script@v6.1.0
-        if: github.event_name == 'pull_request'
-        env:
-          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `Clash Bot Webapp Workspace - apply
-            #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Apply 📖\`${{ steps.apply.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+      - name: Test
+        run: npm test
 
-            <details><summary>Show Apply</summary>
+  # terraformPreReqs:
+  #   name: 'Terraform Plan Prereqs'
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./terraform/prereqs
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #     pull-requests: write
 
-            \`\`\`\n
-            ${process.env.APPLY}
-            \`\`\`
+  #   steps:
+  #     - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
-            </details>
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
+  #       with:
+  #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+  #     - name: Terraform Format
+  #       id: fmt
+  #       run: terraform fmt -check
+
+  #     - name: Terraform Init
+  #       id: init
+  #       run: terraform init
+
+  #     - name: Terraform Validate
+  #       id: validate
+  #       run: terraform validate -no-color
+
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+  #         aws-region: us-east-1
+
+  #     - name: Terraform Plan
+  #       id: plan
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         TF_VAR_region: "us-east-1"
+  #         TF_VAR_environment: "dev"
+  #       run: |
+  #         terraform workspace show
+  #         terraform plan -no-color -auto-approve -input=false
+  #       continue-on-error: true
+
+  #     - name: Update Pull Request
+  #       uses: actions/github-script@v6.1.0
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         script: |
+  #           const output = `Clash Bot Workflow Prerequisites - plan
+  #           #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+  #           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+  #           #### Terraform Prerequisite Plan 📖\`${{ steps.plan.outcome }}\`
+  #           #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+
+  #           <details><summary>Show Plan</summary>
+
+  #           #### Prerequisites
+  #           \`\`\`\n
+  #           ${process.env.PLAN}
+  #           \`\`\`
+
+  #           </details>
+
+  #           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+  #           github.rest.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: output
+  #           })
+
+  # terraformWorkflow:
+  #   name: 'Terraform Plan Workflow'
+  #   runs-on: ubuntu-latest
+  #   defaults:
+  #     run:
+  #       working-directory: ./terraform/workflow
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #     pull-requests: write
+
+  #   steps:
+  #     - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
+
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
+  #       with:
+  #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+  #     - name: Terraform Format
+  #       id: fmt
+  #       run: terraform fmt -check
+
+  #     - name: Terraform Init
+  #       id: init
+  #       run: terraform init
+
+  #     - name: Terraform Validate
+  #       id: validate
+  #       run: terraform validate -no-color
+
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+  #         aws-region: us-east-1
+
+  #     - name: Terraform Plan
+  #       id: plan
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         TF_VAR_region: "us-east-1"
+  #         TF_VAR_environment: "dev"
+  #         TF_VAR_s3_bucket_name: "sample-bucket"
+  #         TF_VAR_event_publisher_artifact_name: "sample-artifact"
+  #         TF_VAR_event_handler_artifact_name: "sample-artifact"
+  #         TF_VAR_sqs_batch_size: "1"
+  #       run: |
+  #         terraform workspace show
+  #         terraform plan -no-color -auto-approve -input=false
+  #       continue-on-error: true
+
+  #     - name: Update Pull Request
+  #       uses: actions/github-script@v6.1.0
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         script: |
+  #           const output = `Clash Bot Workflow - plan
+  #           #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+  #           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+  #           #### Terraform Workflow Plan 📖\`${{ steps.plan.outcome }}\`
+  #           #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+
+  #           <details><summary>Show Plan</summary>
+
+  #           #### Prerequisites
+  #           \`\`\`\n
+  #           ${process.env.PLAN}
+  #           \`\`\`
+
+  #           </details>
+
+  #           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+  #           github.rest.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: output
+  #           })
