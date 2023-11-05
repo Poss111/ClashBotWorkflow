@@ -164,6 +164,7 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform/workflow
+    needs: terraformPreReqs
     permissions:
       id-token: write
       contents: read

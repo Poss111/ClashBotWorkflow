@@ -21,7 +21,7 @@ module "dynamodb_table" {
   billing_mode   = "PROVISIONED"
   write_capacity = 5
   read_capacity  = 1
-  
+
   attributes = [
     {
       name = "type"

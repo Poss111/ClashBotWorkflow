@@ -11,9 +11,9 @@ resource "aws_lambda_function" "event_handler_lambda" {
 
   environment {
     variables = {
-      CREATE_TEAM_SF_ARN = module.create_team_step_function.state_machine_arn
-      UPDATE_TEAM_SF_ARN = module.create_team_step_function.state_machine_arn
-      DELETE_TEAM_SF_ARN = module.create_team_step_function.state_machine_arn
+      CREATE_TEAM_SF_ARN            = module.create_team_step_function.state_machine_arn
+      UPDATE_TEAM_SF_ARN            = module.create_team_step_function.state_machine_arn
+      DELETE_TEAM_SF_ARN            = module.create_team_step_function.state_machine_arn
       CREATE_TENTATIVE_QUEUE_SF_ARN = module.create_team_step_function.state_machine_arn
       UPDATE_TENTATIVE_QUEUE_SF_ARN = module.create_team_step_function.state_machine_arn
       DELETE_TENTATIVE_QUEUE_SF_ARN = module.create_team_step_function.state_machine_arn
