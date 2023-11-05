@@ -123,7 +123,7 @@ jobs:
           TF_VAR_environment: "dev"
         run: |
           terraform workspace show
-          terraform plan -no-color -auto-approve -input=false
+          terraform plan -no-color -input=false
         continue-on-error: true
 
       - name: Update Pull Request
@@ -212,7 +212,7 @@ jobs:
           TF_VAR_dynamodb_table_arn: "arn:aws:dynamodb:us-east-1:816923827429:table/sample-table"
         run: |
           terraform workspace show
-          terraform plan -no-color -auto-approve -input=false
+          terraform plan -no-color -input=false
         continue-on-error: true
 
       - name: Update Pull Request
