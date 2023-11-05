@@ -110,6 +110,7 @@ jobs:
       - name: get caller identity
         run: |
           aws sts get-caller-identity
+          aws configure list
 
       - name: Terraform Init
         id: init
