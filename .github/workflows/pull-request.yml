@@ -37,7 +37,7 @@ jobs:
       - name: Install dependencies and link
         run: |
           npm install
-          npx link clash-bot-shared
+          npx link ../shared
 
       - name: Test
         run: npm test
