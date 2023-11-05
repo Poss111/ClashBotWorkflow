@@ -101,6 +101,12 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
       - name: Terraform Init
         id: init
         run: terraform init
@@ -108,12 +114,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
 
       - name: Terraform Plan
         id: plan
@@ -185,6 +185,12 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
       - name: Terraform Init
         id: init
         run: terraform init
@@ -192,13 +198,6 @@ jobs:
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'
