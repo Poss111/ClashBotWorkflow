@@ -9,3 +9,11 @@ variable "environment" {
   default     = "dev"
   description = "value of the environment to use."
 }
+
+variable "access_key" {
+  type = string
+}
+
+variable "secret_key" {
+  type = string
+}
