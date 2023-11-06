@@ -78,6 +78,8 @@ jobs:
   terraformPreReqs:
     name: 'Terraform Plan Prereqs'
     runs-on: ubuntu-latest
+    environment:
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/prereqs
@@ -153,6 +155,8 @@ jobs:
   terraformWorkflow:
     name: 'Terraform Plan Workflow'
     runs-on: ubuntu-latest
+    environment:
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/workflow
