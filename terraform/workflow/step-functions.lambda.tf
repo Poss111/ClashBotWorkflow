@@ -23,7 +23,7 @@ module "create_team_step_function" {
 
   service_integrations = {
     dynamodb = {
-      dynamodb = [var.dynamodb_table_arn]
+      dynamodb = [module.dynamodb_table.dynamodb_table_arn]
     }
   }
 

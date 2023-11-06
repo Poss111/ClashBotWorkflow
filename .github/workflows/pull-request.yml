@@ -114,11 +114,9 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: dev
-        run: |
-          terraform workspace show
-          terraform plan -no-color -input=false
-        continue-on-error: true
+          TF_VAR_environment: ${{ env.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
+        run: terraform plan -no-color -input=false
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
@@ -191,17 +189,14 @@ jobs:
         id: plan
         if: github.event_name == 'pull_request'
         env:
-          TF_VAR_region: "us-east-1"
-          TF_VAR_environment: "dev"
-          TF_VAR_s3_bucket_name: "sample-bucket"
+          TF_VAR_region: us-east-1
+          TF_VAR_environment: ${{ env.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
           TF_VAR_event_publisher_artifact_name: "sample-artifact"
           TF_VAR_event_handler_artifact_name: "sample-artifact"
           TF_VAR_sqs_batch_size: "1"
           TF_VAR_dynamodb_table_arn: "arn:aws:dynamodb:us-east-1:816923827429:table/sample-table"
-        run: |
-          terraform workspace show
-          terraform plan -no-color -input=false
-        continue-on-error: true
+        run: terraform plan -no-color -input=false
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
