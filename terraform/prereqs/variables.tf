@@ -10,10 +10,10 @@ variable "environment" {
   description = "value of the environment to use."
 }
 
-variable "access_key" {
+variable "access" {
   type = string
 }
 
-variable "secret_key" {
+variable "secret" {
   type = string
 }
