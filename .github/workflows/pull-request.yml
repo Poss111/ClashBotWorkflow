@@ -111,7 +111,6 @@ jobs:
         run: |
           aws sts get-caller-identity
           aws configure list
-          aws s3 ls
 
       - name: Terraform Init
         id: init
