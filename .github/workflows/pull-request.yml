@@ -101,17 +101,6 @@ jobs:
         id: fmt
         run: terraform fmt -check
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
-      - name: get caller identity
-        run: |
-          aws sts get-caller-identity
-          aws configure list
-
       - name: Terraform Init
         id: init
         run: terraform init
@@ -189,12 +178,6 @@ jobs:
       - name: Terraform Format
         id: fmt
         run: terraform fmt -check
-
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
 
       - name: Terraform Init
         id: init
