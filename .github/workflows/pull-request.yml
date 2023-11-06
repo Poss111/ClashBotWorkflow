@@ -78,8 +78,6 @@ jobs:
   terraformPreReqs:
     name: 'Terraform Plan Prereqs'
     runs-on: ubuntu-latest
-    environment:
-      name: Development
     defaults:
       run:
         working-directory: ./terraform/prereqs
@@ -116,7 +114,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: ${{ env.ENVIRONMENT }}
+          TF_VAR_environment: development
           TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
         run: terraform plan -no-color -input=false
 
@@ -155,8 +153,6 @@ jobs:
   terraformWorkflow:
     name: 'Terraform Plan Workflow'
     runs-on: ubuntu-latest
-    environment:
-      name: Development
     defaults:
       run:
         working-directory: ./terraform/workflow
@@ -194,7 +190,7 @@ jobs:
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: ${{ env.ENVIRONMENT }}
+          TF_VAR_environment: development
           TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
           TF_VAR_event_publisher_artifact_name: "sample-artifact"
           TF_VAR_event_handler_artifact_name: "sample-artifact"
