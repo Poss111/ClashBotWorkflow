@@ -19,10 +19,6 @@ terraform {
   }
 }
 
-data "aws_s3_bucket" "lambda_bucket" {
-  bucket = var.s3_bucket_name
-}
-
 data "aws_acm_certificate" "issued" {
   domain   = "clash-bot.ninja"
   statuses = ["ISSUED"]
