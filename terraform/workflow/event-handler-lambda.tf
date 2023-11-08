@@ -7,8 +7,6 @@ resource "aws_lambda_function" "event_handler_lambda" {
   s3_bucket = var.s3_bucket_name
   s3_key    = "${var.environment}/${var.event_handler_artifact_name}.zip}"
 
-  source_code_hash = filebase64sha256("${var.event_handler_artifact_name}.zip")
-
   environment {
     variables = {
       CREATE_TEAM_SF_ARN            = module.create_team_step_function.state_machine_arn

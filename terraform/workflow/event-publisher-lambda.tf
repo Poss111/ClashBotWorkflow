@@ -7,8 +7,6 @@ resource "aws_lambda_function" "event_publisher_lambda" {
   s3_bucket = var.s3_bucket_name
   s3_key    = "${var.environment}/${var.event_publisher_artifact_name}.zip}"
 
-  source_code_hash = filebase64sha256("${var.event_publisher_artifact_name}.zip")
-
   environment {
     variables = {
       QUEUE_URL = module.clash_bot_event_sqs.queue_arn
