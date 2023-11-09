@@ -28,6 +28,7 @@
     "@aws-sdk/client-s3": "^3.405.0",
     "@aws-sdk/client-sqs": "^3.405.0",
     "dotenv": "^16.3.1",
-    "pino": "^8.15.0"
+    "pino": "^8.15.0",
+    "shared": "github:Poss111/ClashBotWorkflow#addInfra:/functions/clash-bot/shared"
   }
 }

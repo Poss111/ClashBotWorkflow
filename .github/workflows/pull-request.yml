@@ -207,7 +207,6 @@ jobs:
           TF_VAR_event_publisher_artifact_name: "sample-artifact"
           TF_VAR_event_handler_artifact_name: "sample-artifact"
           TF_VAR_sqs_batch_size: "1"
-          TF_VAR_dynamodb_table_arn: "arn:aws:dynamodb:us-east-1:816923827429:table/sample-table"
         run: terraform plan -no-color -input=false
 
       - name: Update Pull Request

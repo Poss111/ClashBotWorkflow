@@ -4,7 +4,8 @@
   "description": "A shared module for all of the clash bot workflow functions.",
   "main": "prod/index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "prepublish": "tsc"
   },
   "keywords": [
     "clash-bot",
