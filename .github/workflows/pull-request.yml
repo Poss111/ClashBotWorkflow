@@ -38,14 +38,14 @@ jobs:
 
       - name: Archive
         run: |
-          tar -czvf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+          tar -czf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
           ls -lha
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-publisher-${{ github.run_number }}
-          path: ./event-publisher-${{ github.run_number }}.tar.gz
+          path: event-publisher-${{ github.run_number }}.tar.gz
           if-no-files-found: error
 
   eventHandler:
@@ -77,14 +77,14 @@ jobs:
 
       - name: Archive
         run: |
-          tar -czvf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+          tar -czf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
           ls -lha
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-handler-${{ github.run_number }}
-          path: ./event-handler-${{ github.run_number }}.tar.gz
+          path: event-handler-${{ github.run_number }}.tar.gz
           if-no-files-found: error
 
   terraformPreReqs:
