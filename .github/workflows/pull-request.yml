@@ -45,7 +45,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: event-publisher-${{ github.run_number }}
-          path: event-publisher-${{ github.run_number }}.tar.gz
+          path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
           if-no-files-found: error
 
   eventHandler:
@@ -84,7 +84,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: event-handler-${{ github.run_number }}
-          path: event-handler-${{ github.run_number }}.tar.gz
+          path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
           if-no-files-found: error
 
   terraformPreReqs:
