@@ -27,11 +27,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Install dependencies and link
+      - name: Install depedencies
         run: npm install
 
       - name: Test
         run: npm test
+
+      - name: Archive
+        run: tar -czvf event-publisher-${{ github.run_number }}.tar.gz ./prod
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-publisher-${{ github.run_number }}
+          path: ./event-publisher-${{ github.run_number }}.tar.gz
 
   eventHandler:
     name: Event Handler Lambda
@@ -51,11 +60,20 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       
-      - name: Install dependencies and link
+      - name: Install dependencies
         run: npm install
 
       - name: Test
         run: npm test
+
+      - name: Archive
+        run: tar -czvf event-handler-${{ github.run_number }}.tar.gz ./prod
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-handler-${{ github.run_number }}
+          path: ./event-handler-${{ github.run_number }}.tar.gz
 
   terraformPreReqs:
     name: 'Terraform Plan Prereqs'
@@ -156,6 +174,18 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Extract Event Publisher Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: event-publisher-${{ github.run_number }}
+          path: ./terraform/prereqs
+
+      - name: Extract Event Handler Artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: event-handler-${{ github.run_number }}
+          path: ./terraform/prereqs
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
@@ -186,8 +216,8 @@ jobs:
           TF_VAR_region: us-east-1
           TF_VAR_environment: development
           TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
-          TF_VAR_event_publisher_artifact_name: "sample-artifact"
-          TF_VAR_event_handler_artifact_name: "sample-artifact"
+          TF_VAR_event_publisher_artifact_name: event-publisher-${{ github.run_number }}.tar.gz
+          TF_VAR_event_handler_artifact_name: event-handler-${{ github.run_number }}.tar.gz
           TF_VAR_sqs_batch_size: "1"
         run: terraform plan -no-color -input=false
 
