@@ -37,7 +37,7 @@ jobs:
         run: npm run build
 
       - name: Archive
-        run: tar -czvf event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+        run: tar -czvf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
@@ -73,7 +73,7 @@ jobs:
         run: npm run build
 
       - name: Archive
-        run: tar -czvf event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+        run: tar -czvf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
