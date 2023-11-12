@@ -1,0 +1,3 @@
+[submodule "functions/clash-bot/clash-bot-shared"]
+	path = functions/clash-bot/clash-bot-shared
+	url = git@github.com:Poss111/ClashBotWorkflowShared.git

@@ -11,7 +11,7 @@ on:
 jobs:
     terraformPreReqs:
       name: 'Terraform Apply Prereqs'
-      environment: development
+      environment: Development
       runs-on: ubuntu-latest
       defaults:
         run:
@@ -60,6 +60,7 @@ jobs:
 
     eventPublisher:
         name: Build and Deploy Event Publisher Lambda
+        environment: Development
         runs-on: ubuntu-latest
         defaults:
             run:
@@ -85,6 +86,7 @@ jobs:
 
     eventHandler:
         name: Build and Deploy Event Handler Lambda
+        environment: Development
         runs-on: ubuntu-latest
         defaults:
             run:

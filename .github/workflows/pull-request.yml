@@ -27,17 +27,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build shared archive
-        working-directory: ./functions/clash-bot/shared
-        run: |
-          npm install
-          npx tsc
-          npm pack
-      
       - name: Install dependencies and link
-        run: |
-          npm install
-          npx link ../shared
+        run: npm install
 
       - name: Test
         run: npm test
@@ -59,18 +50,9 @@ jobs:
       
       - name: Checkout
         uses: actions/checkout@v2
-
-      - name: Build shared archive
-        working-directory: ./functions/clash-bot/shared
-        run: |
-          npm install
-          npx tsc
-          npm pack
       
       - name: Install dependencies and link
-        run: |
-          npm install
-          npx link ../shared
+        run: npm install
 
       - name: Test
         run: npm test

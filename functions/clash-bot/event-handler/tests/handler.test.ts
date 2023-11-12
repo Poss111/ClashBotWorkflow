@@ -57,6 +57,7 @@ describe('Should invoke a AWS Step function based on the event.', () => {
                     mock: 'mock'
                 }, 
                 event: eventEntry.event,
+                uuid: '1234'
             };
             const sqsEvent: SQSEvent = {
                 Records: [
@@ -98,6 +99,7 @@ describe('Should invoke a AWS Step function based on the event.', () => {
                     mock: 'mock'
                 }, 
                 event: EVENT_TYPE.CREATE_TEAM,
+                uuid: '1234'
             };
             const updateTeamEvent: EventPayload = { 
                 url: '/api/v2/teams', 
@@ -105,6 +107,7 @@ describe('Should invoke a AWS Step function based on the event.', () => {
                     mock: 'mock'
                 }, 
                 event: EVENT_TYPE.UPDATE_TEAM,
+                uuid: '1234'
             };
             const sqsEvent: SQSEvent = {
                 Records: [
@@ -167,6 +170,7 @@ describe('Should invoke a AWS Step function based on the event.', () => {
             url: '/api/v2/teams', 
             payload: {}, 
             event: EVENT_TYPE.CREATE_TEAM,
+            uuid: '1234'
         };
         const sqsEvent: SQSEvent = {
             Records: [

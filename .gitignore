@@ -6,3 +6,4 @@ node_modules
 *.auto.tfvars
 
 prod/
+package-lock.json
