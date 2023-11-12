@@ -4,7 +4,8 @@
   "description": "A typescript/nodejs project for interacting with Clash Bot Teams.",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "keywords": [
     "clash-bot"

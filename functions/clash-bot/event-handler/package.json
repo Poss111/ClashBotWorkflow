@@ -4,7 +4,8 @@
   "description": "A clash bot function",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "keywords": [
     "clash-bot",
