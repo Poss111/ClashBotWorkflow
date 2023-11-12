@@ -37,13 +37,16 @@ jobs:
         run: npm run build
 
       - name: Archive
-        run: tar -czvf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+        run: |
+          tar -czvf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+          ls -lha
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-publisher-${{ github.run_number }}
           path: ./event-publisher-${{ github.run_number }}.tar.gz
+          if-no-files-found: error
 
   eventHandler:
     name: Event Handler Lambda
@@ -73,13 +76,16 @@ jobs:
         run: npm run build
 
       - name: Archive
-        run: tar -czvf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+        run: |
+          tar -czvf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
+          ls -lha
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-handler-${{ github.run_number }}
           path: ./event-handler-${{ github.run_number }}.tar.gz
+          if-no-files-found: error
 
   terraformPreReqs:
     name: 'Terraform Plan Prereqs'
