@@ -162,7 +162,10 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform/workflow
-    needs: terraformPreReqs
+    needs: 
+      - terraformPreReqs
+      - eventPublisher
+      - eventHandler
     permissions:
       id-token: write
       contents: read
