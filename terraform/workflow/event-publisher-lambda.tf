@@ -26,14 +26,25 @@ resource "aws_iam_role" "lambda_publisher_exec" {
         Principal = {
           Service = "lambda.amazonaws.com"
         }
-      },
+      }
     ]
   })
 }
 
+resource "aws_lambda_permission" "apigw" {
+  statement_id  = "AllowExecutionFromAPIGateway"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.event_publisher_lambda.function_name
+  principal     = "apigateway.amazonaws.com"
+
+  # The /*/* portion grants access from any method on any resource
+  # within the API Gateway "REST API".
+  source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/$default"
+}
+
 resource "aws_iam_role_policy_attachment" "lambda_publisher_exec_policy" {
   role       = aws_iam_role.lambda_handler_exec.name
-  policy_arn = resource.aws_iam_policy.event_publisher_policy.arn
+  policy_arn = aws_iam_policy.event_publisher_policy.arn
 }
 
 data "aws_iam_policy_document" "event_publisher_policy_document" {
