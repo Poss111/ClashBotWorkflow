@@ -32,6 +32,34 @@ resource "aws_iam_role" "lambda_publisher_exec" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_publisher_exec_policy" {
-  role       = aws_iam_role.lambda_publisher_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  role       = aws_iam_role.lambda_handler_exec.name
+  policy_arn = resource.aws_iam_policy.event_publisher_policy.arn
+}
+
+data "aws_iam_policy_document" "event_publisher_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+      "sqs:ReceiveMessage",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "event_publisher_policy" {
+  name        = "ClashBotEventPublisherPolicy"
+  description = "Allows the event publisher lambda to publish events to the event queue and log events to CloudWatch"
+  policy      = data.aws_iam_policy_document.event_publisher_policy_document.json
 }

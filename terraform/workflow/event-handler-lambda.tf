@@ -37,12 +37,40 @@ resource "aws_iam_role" "lambda_handler_exec" {
         Principal = {
           Service = "lambda.amazonaws.com"
         }
-      },
+      }
     ]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_handler_exec_policy" {
   role       = aws_iam_role.lambda_handler_exec.name
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+  policy_arn = resource.aws_iam_policy.event_handler_policy.arn
+}
+
+data "aws_iam_policy_document" "event_handler_policy_document" {
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogGroup",
+      "logs:CreateLogStream",
+      "logs:PutLogEvents"
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "sqs:DeleteMessage",
+      "sqs:GetQueueAttributes",
+      "sqs:ReceiveMessage",
+    ]
+    resources = ["*"]
+  }
+}
+
+resource "aws_iam_policy" "event_handler_policy" {
+  name        = "ClashBotWorkflowEventHandlerPolicy"
+  description = "Allows the event handler lambda to interact with SQS and CloudWatch Logs"
+  policy      = data.aws_iam_policy_document.event_handler_policy_document.json
 }
