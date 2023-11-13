@@ -43,7 +43,7 @@ resource "aws_lambda_permission" "apigw" {
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_publisher_exec_policy" {
-  role       = aws_iam_role.lambda_handler_exec.name
+  role       = aws_iam_role.lambda_publisher_exec.name
   policy_arn = aws_iam_policy.event_publisher_policy.arn
 }
 
