@@ -38,7 +38,7 @@ module "api_gateway" {
   }
 
   # Custom domain
-  domain_name                 = "${var.environment}.clash-bot.ninja"
+  domain_name                 = data.aws_acm_certificate.issued.domain
   domain_name_certificate_arn = data.aws_acm_certificate.issued.arn
 
   # Access logs

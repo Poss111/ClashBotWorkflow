@@ -3,7 +3,7 @@ provider "aws" {
 
   default_tags {
     tags = {
-      Application = "ClashBot"
+      Application = "ClashBot-Workflow"
       Environment = var.environment
     }
   }
