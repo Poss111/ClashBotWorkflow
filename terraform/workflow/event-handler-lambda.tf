@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "event_handler_lambda" {
   function_name = "clash-bot-event-handler"
-  handler       = "handler.handler"
+  handler       = "prod/handler.handler"
   runtime       = "nodejs16.x"
   role          = aws_iam_role.lambda_handler_exec.arn
 

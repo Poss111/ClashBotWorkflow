@@ -1,9 +1,12 @@
 node_modules
 .vscode
 .terraform
+.terraform.lock.hcl
 
 *.tgz
 *.auto.tfvars
 
 prod/
 package-lock.json
+
+.DS_Store
