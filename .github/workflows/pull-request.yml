@@ -267,21 +267,22 @@ jobs:
               repo: context.repo.repo,
               body: output
             })
-    
-      - name: Install Graphviz
-        run: sudo apt-get install -y graphviz
+ 
+      # Commenting for now until I can cut down on graph size
+      # - name: Install Graphviz
+      #   run: sudo apt-get install -y graphviz
 
-      - name: Generate Graph
-        run: |
-          terraform graph > graph.dot
-          dot -Tpng graph.dot -o graph.png
+      # - name: Generate Graph
+      #   run: |
+      #     terraform graph > graph.dot
+      #     dot -Tpng graph.dot -o graph.png
 
-      - name: Commit and push
-        run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add graph.png
-          git commit -m "Update Terraform graph [skip ci]" -a
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - name: Commit and push
+      #   run: |
+      #     git config --local user.email "action@github.com"
+      #     git config --local user.name "GitHub Action"
+      #     git add graph.png
+      #     git commit -m "Update Terraform graph [skip ci]" -a
+      #     git push
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
