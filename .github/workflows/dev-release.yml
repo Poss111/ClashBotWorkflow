@@ -97,7 +97,7 @@ jobs:
               uses: actions/upload-artifact@v2
               with:
                 name: event-handler-${{ github.run_number }}
-                path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
+                path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.zip
                 if-no-files-found: error
 
     eventHandler:
@@ -140,13 +140,13 @@ jobs:
         - name: Archive and Publish
           run: |
             zip -r ./event-handler-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
-            aws s3 cp ./event-handler-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}-${{ vars.ENVIRONMENT }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler-${{ github.run_number }}.zip
+            aws s3 cp ./event-handler-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler-${{ github.run_number }}.zip
 
         - name: Upload Artifacts
           uses: actions/upload-artifact@v2
           with:
             name: event-handler-${{ github.run_number }}
-            path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
+            path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.zip
             if-no-files-found: error
 
     terraformWorkflow:
