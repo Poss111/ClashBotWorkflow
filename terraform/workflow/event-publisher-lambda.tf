@@ -1,6 +1,6 @@
 resource "aws_lambda_function" "event_publisher_lambda" {
   function_name = "clash-bot-event-publisher"
-  handler       = "handler.handler"
+  handler       = "prod/handler.handler"
   runtime       = "nodejs16.x"
   role          = aws_iam_role.lambda_publisher_exec.arn
 
