@@ -57,6 +57,9 @@ jobs:
           name: Development
         runs-on: ubuntu-latest
         needs: terraformPreReqs
+        permissions:
+          id-token: write
+          contents: read
         defaults:
             run:
                 working-directory: ./functions/clash-bot/event-publisher
@@ -103,6 +106,9 @@ jobs:
           name: Development
         runs-on: ubuntu-latest
         needs: terraformPreReqs
+        permissions:
+          id-token: write
+          contents: read
         defaults:
             run:
                 working-directory: ./functions/clash-bot/event-handler
