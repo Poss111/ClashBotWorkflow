@@ -1,16 +1,16 @@
 name: Build and Deploy into Development
 
 on:
-    push:
-        branches:
-            - main
-        paths-ignore:
-            - '**/README.md'
-            - '**/.gitignore'
+  push:
+      branches:
+          - main
+      paths-ignore:
+          - '**/README.md'
+          - '**/.gitignore'
 
 jobs:
     terraformPreReqs:
-      name: 'Terraform Apply Prereqs'
+      name: Prerequisite Infrastructure
       environment: Development
       runs-on: ubuntu-latest
       defaults:
@@ -46,7 +46,7 @@ jobs:
           id: apply
           env:
             TF_VAR_region: us-east-1
-            TF_VAR_environment: development
+            TF_VAR_environment: ${{ env.ENVIRONMENT }}
             TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
           run: terraform apply -no-color -input=false --auto-approve
 
@@ -54,6 +54,7 @@ jobs:
         name: Build and Deploy Event Publisher Lambda
         environment: Development
         runs-on: ubuntu-latest
+        needs: terraformPreReqs
         defaults:
             run:
                 working-directory: ./functions/clash-bot/event-publisher
@@ -98,6 +99,7 @@ jobs:
         name: Build and Deploy Event Handler Lambda
         environment: Development
         runs-on: ubuntu-latest
+        needs: terraformPreReqs
         defaults:
             run:
                 working-directory: ./functions/clash-bot/event-handler
@@ -139,8 +141,9 @@ jobs:
             if-no-files-found: error
 
     terraformWorkflow:
-      name: Terraform Workflow Apply
+      name: Workflow Infrastructure
       runs-on: ubuntu-latest
+      environment: Development
       defaults:
         run:
           working-directory: ./terraform/workflow
