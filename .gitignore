@@ -1,0 +1,9 @@
+node_modules
+.vscode
+.terraform
+
+*.tgz
+*.auto.tfvars
+
+prod/
+package-lock.json
