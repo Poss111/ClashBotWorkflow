@@ -67,17 +67,6 @@ data "aws_iam_policy_document" "event_publisher_policy_document" {
     ]
     resources = ["*"]
   }
-
-  statement {
-    actions = ["lambda:InvokeFunction"]
-
-    principals {
-      type        = "Service"
-      identifiers = ["apigateway.amazonaws.com"]
-    }
-
-    resources = [aws_lambda_function.event_publisher_lambda.arn]
-  }
 }
 
 resource "aws_iam_policy" "event_publisher_policy" {
