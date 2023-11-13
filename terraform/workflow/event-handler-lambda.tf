@@ -44,7 +44,7 @@ resource "aws_iam_role" "lambda_handler_exec" {
 
 resource "aws_iam_role_policy_attachment" "lambda_handler_exec_policy" {
   role       = aws_iam_role.lambda_handler_exec.name
-  policy_arn = resource.aws_iam_policy.event_handler_policy.arn
+  policy_arn = aws_iam_policy.event_handler_policy.arn
 }
 
 data "aws_iam_policy_document" "event_handler_policy_document" {
