@@ -34,7 +34,7 @@ resource "aws_iam_role" "lambda_publisher_exec" {
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowExecutionFromAPIGateway"
   action        = "lambda:InvokeFunction"
-  function_name = "${aws_lambda_function.event_publisher_lambda.function_name}"
+  function_name = aws_lambda_function.event_publisher_lambda.function_name
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource
