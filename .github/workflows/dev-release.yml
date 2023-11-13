@@ -11,7 +11,8 @@ on:
 jobs:
     terraformPreReqs:
       name: Prerequisite Infrastructure
-      environment: Development
+      environment: 
+        name: Development
       runs-on: ubuntu-latest
       defaults:
         run:
@@ -52,7 +53,8 @@ jobs:
 
     eventPublisher:
         name: Build and Deploy Event Publisher Lambda
-        environment: Development
+        environment:
+          name: Development
         runs-on: ubuntu-latest
         needs: terraformPreReqs
         defaults:
@@ -97,7 +99,8 @@ jobs:
 
     eventHandler:
         name: Build and Deploy Event Handler Lambda
-        environment: Development
+        environment: 
+          name: Development
         runs-on: ubuntu-latest
         needs: terraformPreReqs
         defaults:
@@ -143,7 +146,8 @@ jobs:
     terraformWorkflow:
       name: Workflow Infrastructure
       runs-on: ubuntu-latest
-      environment: Development
+      environment: 
+        name: Development
       defaults:
         run:
           working-directory: ./terraform/workflow
