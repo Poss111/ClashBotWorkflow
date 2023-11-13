@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 module "lambda_bucket" {
   source = "terraform-aws-modules/s3-bucket/aws"
 
-  bucket = "${var.s3_bucket_name}-${var.environment}"
+  bucket = var.s3_bucket_name
   acl    = "private"
 
   control_object_ownership = true
@@ -24,7 +24,7 @@ module "lambda_bucket" {
           "AWS": "arn:aws:iam::${data.aws_caller_identity.current.account_id}:ClashBotGitHubUser"
         },
         "Action": "s3:PutObject",
-        "Resource": "arn:aws:s3:::${var.s3_bucket_name}-${var.environment}/*"
+        "Resource": "arn:aws:s3:::${var.s3_bucket_name}/*"
       }
     ]
   }

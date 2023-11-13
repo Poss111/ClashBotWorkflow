@@ -75,7 +75,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
         
-            - name: Install dependencies and link
+            - name: Install dependencies
               run: |
                 npm install
 
@@ -90,8 +90,8 @@ jobs:
     
             - name: Archive and Publish
               run: |
-                tar -czf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-                aws s3 cp ./event-publisher-${{ github.run_number }}.tar.gz s3://${{ vars.S3_BUCKET_NAME }}-${{ vars.ENVIRONMENT }}/artifacts/${{ github.run_number }}/event-publisher-${{ github.run_number }}.tar.gz
+                zip -r ./event-publisher-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
+                aws s3 cp ./event-publisher-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher-${{ github.run_number }}.zip
       
             - name: Upload Artifacts
               uses: actions/upload-artifact@v2
@@ -139,9 +139,9 @@ jobs:
 
         - name: Archive and Publish
           run: |
-            tar -czf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-            aws s3 cp ./event-handler-${{ github.run_number }}.tar.gz s3://${{ vars.S3_BUCKET_NAME }}-${{ vars.ENVIRONMENT }}/artifacts/${{ github.run_number }}/event-handler-${{ github.run_number }}.tar.gz
-  
+            zip -r ./event-handler-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
+            aws s3 cp ./event-handler-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}-${{ vars.ENVIRONMENT }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler-${{ github.run_number }}.zip
+
         - name: Upload Artifacts
           uses: actions/upload-artifact@v2
           with:
@@ -191,8 +191,8 @@ jobs:
           env:
             TF_VAR_region: us-east-1
             TF_VAR_environment: ${{ vars.ENVIRONMENT }}
-            TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}-${{ vars.ENVIRONMENT }}
-            TF_VAR_event_publisher_artifact_path: artifacts/${{ github.run_number }}/event-publisher-${{ github.run_number }}.tar.gz
-            TF_VAR_event_handler_artifact_path: artifacts/${{ github.run_number }}/event-handler-${{ github.run_number }}.tar.gz
+            TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+            TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher-${{ github.run_number }}.zip
+            TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler-${{ github.run_number }}.zip
             TF_VAR_sqs_batch_size: "1"
           run: terraform apply -no-color -input=false --auto-approve
