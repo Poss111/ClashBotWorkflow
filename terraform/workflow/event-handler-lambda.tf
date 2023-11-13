@@ -5,7 +5,7 @@ resource "aws_lambda_function" "event_handler_lambda" {
   role          = aws_iam_role.lambda_handler_exec.arn
 
   s3_bucket = var.s3_bucket_name
-  s3_key    = "${var.environment}/${var.event_handler_artifact_name}.zip}"
+  s3_key    = var.event_handler_artifact_path
 
   environment {
     variables = {

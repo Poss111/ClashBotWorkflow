@@ -15,14 +15,14 @@ variable "s3_bucket_name" {
   description = "The s3 bucket that stores the lambda function code."
 }
 
-variable "event_publisher_artifact_name" {
+variable "event_publisher_artifact_path" {
   type        = string
-  description = "value of the artifact name for the event publisher lambda function."
+  description = "Path to the artifact for the event publisher lambda function."
 }
 
-variable "event_handler_artifact_name" {
+variable "event_handler_artifact_path" {
   type        = string
-  description = "value of the artifact name for the event handler lambda function."
+  description = "Path to the artifact for the event handler lambda function."
 }
 
 variable "sqs_batch_size" {
