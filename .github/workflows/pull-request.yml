@@ -284,7 +284,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init -backend-config=/backend-configs/${{ vars.ENVIRONMENT }}.hcl
+        run: terraform init -backend-config=backend-configs/${{ vars.ENVIRONMENT }}.remote.tfbackend
 
       - name: Terraform Validate
         id: validate

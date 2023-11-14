@@ -7,3 +7,7 @@ provider "aws" {
     }
   }
 }
+
+terraform {
+  backend "remote" {}
+}
