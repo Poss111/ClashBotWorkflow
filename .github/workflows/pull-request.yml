@@ -100,6 +100,9 @@ jobs:
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-publisher
+    permissions:
+      id-token: write
+      contents: read
     needs: 
       - terraformPreReqs
     
@@ -149,6 +152,9 @@ jobs:
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-handler
+    permissions:
+      id-token: write
+      contents: read
     needs: 
       - terraformPreReqs
     
@@ -198,14 +204,14 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform/workflow
-    needs: 
-      - terraformPreReqs
-      - eventPublisher
-      - eventHandler
     permissions:
       id-token: write
       contents: read
       pull-requests: write
+    needs: 
+      - terraformPreReqs
+      - eventPublisher
+      - eventHandler
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
