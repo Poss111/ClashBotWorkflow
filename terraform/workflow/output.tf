@@ -1,5 +1,5 @@
 output "api-gateway-endpoint" {
-  value       = module.api_gateway.apigatewayv2_api_endpoint.apigatewayv2_api_api_endpoint
+  value       = module.api_gateway.apigatewayv2_api_api_endpoint
   description = "The endpoint for the API Gateway."
 }
 
