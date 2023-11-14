@@ -9,87 +9,11 @@ on:
       - '**/.gitignore'
 
 jobs:
-  eventPublisher:
-    name: Event Publisher Lambda
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-publisher
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install depedencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Archive
-        run: |
-          tar -czf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-          ls -lha
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-publisher-${{ github.run_number }}
-          path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
-          if-no-files-found: error
-
-  eventHandler:
-    name: Event Handler Lambda
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-handler
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Archive
-        run: |
-          tar -czf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-          ls -lha
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-handler-${{ github.run_number }}
-          path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
-          if-no-files-found: error
-
   terraformPreReqs:
-    name: 'Terraform Plan Prereqs'
+    name: Prerequisites Apply
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/prereqs
@@ -127,34 +51,34 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
+      - name: Apply
+        id: apply
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: development
-          TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
-        run: terraform plan -no-color -input=false
+          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+        run: terraform apply -no-color -input=false
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `Clash Bot Workflow Prerequisites - plan
+            const output = `Clash Bot Workflow Prerequisites - Apply
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Prerequisite Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Prerequisite Apply 📖\`${{ steps.apply.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+            <details><summary>Show Apply</summary>
 
             #### Prerequisites
             \`\`\`\n
-            ${process.env.PLAN}
+            ${process.env.APPLY}
             \`\`\`
 
             </details>
@@ -168,9 +92,109 @@ jobs:
               body: output
             })
 
-  terraformWorkflow:
-    name: 'Terraform Plan Workflow'
+  eventPublisher:
+    name: Event Publisher Lambda Build & Deploy
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-publisher
+    needs: 
+      - terraformPreReqs
+    
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install depedencies
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Archive and Publish
+        run: |
+          zip -r ./event-publisher-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-publisher-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-publisher-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
+          path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
+          if-no-files-found: error
+
+  eventHandler:
+    name: Event Handler Lambda Build & Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-handler
+    needs: 
+      - terraformPreReqs
+    
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+      - name: Build
+        run: npm run build
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Archive and Publish
+        run: |
+          zip -r ./event-handler-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-handler-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-handler-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
+          path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
+          if-no-files-found: error
+
+  terraformWorkflow:
+    name: Workflow Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/workflow
@@ -188,18 +212,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v3
-
-      - name: Extract Event Publisher Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: event-publisher-${{ github.run_number }}
-          path: ./terraform/prereqs
-
-      - name: Extract Event Handler Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: event-handler-${{ github.run_number }}
-          path: ./terraform/prereqs
 
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
@@ -224,37 +236,36 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
-        if: github.event_name == 'pull_request'
+      - name: Apply
+        id: apply
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: development
+          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
           TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
-          TF_VAR_event_publisher_artifact_path: event-publisher-${{ github.run_number }}.tar.gz
-          TF_VAR_event_handler_artifact_path: event-handler-${{ github.run_number }}.tar.gz
+          TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+          TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
           TF_VAR_sqs_batch_size: "1"
-        run: terraform plan -no-color -input=false
+        run: terraform apply -no-color -input=false --auto-approve
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `Clash Bot Workflow - plan
+            const output = `Clash Bot Workflow - Apply
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Workflow Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Workflow Apply 📖\`${{ steps.apply.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+            <details><summary>Show Run</summary>
 
-            #### Prerequisites
+            #### Workflow Apply
             \`\`\`\n
-            ${process.env.PLAN}
+            ${process.env.APPLY}
             \`\`\`
 
             </details>
