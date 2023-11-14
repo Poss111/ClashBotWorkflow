@@ -1,0 +1,156 @@
+name: Relase Clash Bot Workflow
+
+on:
+  push:
+    tags:
+        - 'v*.*.*'
+    paths-ignore:
+      - '**/README.md'
+      - '**/.gitignore'
+
+jobs:
+  eventPublisherDeploy:
+    name: Event Publisher Lambda Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Production
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-publisher
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install depedencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Archive and Publish
+        run: |
+          zip -r ./event-publisher.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-publisher.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-publisher-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
+          path: ./functions/clash-bot/event-publisher/event-publisher.zip
+          if-no-files-found: error
+
+  eventHandlerDeploy:
+    name: Event Handler Lambda Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Production
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-handler
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Archive and Publish
+        run: |
+          zip -r ./event-handler.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-handler.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: event-handler-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
+          path: ./functions/clash-bot/event-handler/event-handler.zip
+          if-no-files-found: error
+
+  terraformWorkflow:
+    name: Workflow Apply
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./terraform/workflow
+    permissions:
+      id-token: write
+      contents: read
+      pull-requests: write
+    needs:
+      - eventPublisherDeploy
+      - eventHandlerDeploy
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v1
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      - name: Select Workspace
+        id: workspace
+        run: terraform workspace select ${{ vars.WORKSPACE }} || terraform workspace new ${{ vars.WORKSPACE }}
+
+      - name: Apply
+        id: apply
+        env:
+          TF_VAR_region: us-east-1
+          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+          TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+          TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+          TF_VAR_sqs_batch_size: "1"
+        run: terraform apply -no-color -input=false --auto-approve
