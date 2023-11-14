@@ -98,9 +98,6 @@ jobs:
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-publisher
-    permissions:
-      id-token: write
-      contents: read
     needs: 
       - terraformPreReqs
     
@@ -148,7 +145,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Install depedencies
-        run: npm install --prod
+        run: npm install
 
       - name: Build
         run: npm run build
@@ -174,8 +171,6 @@ jobs:
   eventHandlerBuild:
     name: Event Handler Lambda Build
     runs-on: ubuntu-latest
-    environment: 
-      name: Development
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-handler
@@ -226,7 +221,7 @@ jobs:
         uses: actions/checkout@v2
       
       - name: Install dependencies
-        run: npm install --production
+        run: npm install
 
       - name: Build
         run: npm run build
