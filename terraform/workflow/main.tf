@@ -1,6 +1,6 @@
 terraform {
   backend "remote" {
-    organization = "Clash Bot"
+    organization = "ClashBot"
 
     workspaces {
       name = "ClashBotWorkflow"
