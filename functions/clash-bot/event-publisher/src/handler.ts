@@ -36,6 +36,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
             QueueUrl: process.env.QUEUE_URL,
             MessageBody: JSON.stringify(eventToBeSent),
             MessageGroupId: 'event',
+            MessageDeduplicationId: event.requestContext.requestId
         };
         const message = new SendMessageCommand(input);
         const response = await sqsClient

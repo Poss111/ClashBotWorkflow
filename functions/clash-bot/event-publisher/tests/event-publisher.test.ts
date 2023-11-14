@@ -36,6 +36,7 @@ describe('Publish an event to SQS with an event type.', () => {
             QueueUrl: process.env.QUEUE_URL,
             MessageBody: JSON.stringify(expectedEventToBeSent),
             MessageGroupId: 'event',
+            MessageDeduplicationId: eventTwo.requestContext.requestId
         });
     });
 
