@@ -61,11 +61,11 @@ data "aws_iam_policy_document" "event_publisher_policy_document" {
   statement {
     effect = "Allow"
     actions = [
-      "sqs:DeleteMessage",
-      "sqs:GetQueueAttributes",
-      "sqs:ReceiveMessage",
+      "sqs:SendMessage"
     ]
-    resources = ["*"]
+    resources = [
+      module.clash_bot_event_sqs.queue_arn
+    ]
   }
 }
 

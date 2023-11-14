@@ -65,7 +65,9 @@ data "aws_iam_policy_document" "event_handler_policy_document" {
       "sqs:GetQueueAttributes",
       "sqs:ReceiveMessage",
     ]
-    resources = ["*"]
+    resources = [
+      module.clash_bot_event_sqs.queue_arn
+    ]
   }
 }
 
