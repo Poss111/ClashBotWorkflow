@@ -69,6 +69,17 @@ data "aws_iam_policy_document" "event_handler_policy_document" {
       module.clash_bot_event_sqs.queue_arn
     ]
   }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "states:StartExecution"
+    ]
+    resources = [
+      module.create_team_step_function.state_machine_arn
+    ]
+
+  }
 }
 
 resource "aws_iam_policy" "event_handler_policy" {
