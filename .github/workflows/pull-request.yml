@@ -286,6 +286,10 @@ jobs:
         id: init
         run: terraform init
 
+      - name: Select Workspace
+        id: workspace
+        run: terraform workspace select ${{ vars.WORKSPACE }} || terraform workspace new ${{ vars.WORKSPACE }}
+
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
