@@ -9,12 +9,6 @@ provider "aws" {
   }
 }
 
-terraform {
-  backend "remote" {
-    organization = "ClashBot"
-  }
-}
-
 data "aws_acm_certificate" "issued" {
   domain   = "clash-bot.ninja"
   statuses = ["ISSUED"]
