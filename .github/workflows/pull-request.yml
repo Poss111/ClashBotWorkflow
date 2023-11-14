@@ -165,7 +165,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: event-publisher-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./event-publisher.tar.gz
+          path: ./event-publisher.zip
           if-no-files-found: error
 
   eventHandlerBuild:
@@ -241,7 +241,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: event-handler-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./event-handler.tar.gz
+          path: ./event-handler.zip
           if-no-files-found: error
 
   terraformWorkflow:
