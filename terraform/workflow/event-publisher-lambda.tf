@@ -9,7 +9,7 @@ resource "aws_lambda_function" "event_publisher_lambda" {
 
   environment {
     variables = {
-      QUEUE_URL = module.clash_bot_event_sqs.queue_arn
+      QUEUE_URL = module.clash_bot_event_sqs.queue_url
     }
   }
 }
