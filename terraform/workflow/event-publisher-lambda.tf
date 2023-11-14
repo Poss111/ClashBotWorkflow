@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "event_publisher_lambda" {
-  function_name = "clash-bot-event-publisher"
+  function_name = "clash-bot-event-publisher-${lower(var.environment)}"
   handler       = "prod/handler.handler"
   runtime       = "nodejs16.x"
   role          = aws_iam_role.lambda_publisher_exec.arn
@@ -15,7 +15,7 @@ resource "aws_lambda_function" "event_publisher_lambda" {
 }
 
 resource "aws_iam_role" "lambda_publisher_exec" {
-  name = "clash_bot_lambda_event_publisher_exec_role"
+  name = "clash_bot_event_publisher_exec_role-${lower(var.environment)}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -32,14 +32,14 @@ resource "aws_iam_role" "lambda_publisher_exec" {
 }
 
 resource "aws_lambda_permission" "apigw" {
-  statement_id  = "AllowExecutionFromAPIGateway"
+  statement_id  = "AllowExecutionFromAPIGateway-${lower(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.event_publisher_lambda.function_name
   principal     = "apigateway.amazonaws.com"
 
   # The /*/* portion grants access from any method on any resource
   # within the API Gateway "REST API".
-  source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/$default"
+  source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_publisher_exec_policy" {
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "event_publisher_policy_document" {
 }
 
 resource "aws_iam_policy" "event_publisher_policy" {
-  name        = "ClashBotEventPublisherPolicy"
+  name        = "ClashBotEventPublisherPolicy-${lower(var.environment)}"
   description = "Allows the event publisher lambda to publish events to the event queue and log events to CloudWatch"
   policy      = data.aws_iam_policy_document.event_publisher_policy_document.json
 }

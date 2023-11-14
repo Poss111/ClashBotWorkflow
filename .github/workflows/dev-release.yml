@@ -1,12 +1,10 @@
 name: Build and Deploy into Development
 
 on:
-  push:
-      branches:
-          - main
-      paths-ignore:
-          - '**/README.md'
-          - '**/.gitignore'
+  workflow_run:
+    workflows: [Build - Clash Bot Workflow]
+    types:
+      - completed
 
 jobs:
     terraformPreReqs:
@@ -195,4 +193,5 @@ jobs:
             TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher-${{ github.run_number }}.zip
             TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler-${{ github.run_number }}.zip
             TF_VAR_sqs_batch_size: "1"
+            TF_VAR_workspace: ${{ vars.WORKSPACE}}
           run: terraform apply -no-color -input=false --auto-approve

@@ -1,5 +1,5 @@
 resource "aws_lambda_function" "event_handler_lambda" {
-  function_name = "clash-bot-event-handler"
+  function_name = "clash-bot-event-handler-${lower(var.environment)}"
   handler       = "prod/handler.handler"
   runtime       = "nodejs16.x"
   role          = aws_iam_role.lambda_handler_exec.arn
@@ -26,7 +26,7 @@ resource "aws_lambda_event_source_mapping" "sqs_trigger" {
 }
 
 resource "aws_iam_role" "lambda_handler_exec" {
-  name = "clash_bot_lambda_event_handler_exec_role"
+  name = "clash_bot_event_handler_exec_role-${lower(var.environment)}"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
@@ -70,7 +70,7 @@ data "aws_iam_policy_document" "event_handler_policy_document" {
 }
 
 resource "aws_iam_policy" "event_handler_policy" {
-  name        = "ClashBotWorkflowEventHandlerPolicy"
+  name        = "ClashBotWorkflowEventHandlerPolicy-${lower(var.environment)}"
   description = "Allows the event handler lambda to interact with SQS and CloudWatch Logs"
   policy      = data.aws_iam_policy_document.event_handler_policy_document.json
 }
