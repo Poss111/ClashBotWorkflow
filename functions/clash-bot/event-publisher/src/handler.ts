@@ -47,6 +47,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
             })
         };
     } catch (error) {
+        logger.error(error, "Failed to publish event.");
         return {
             statusCode: 500,
             body: JSON.stringify({

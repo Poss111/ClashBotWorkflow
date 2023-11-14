@@ -51,7 +51,7 @@ module "api_gateway" {
 
   # Routes and integrations
   integrations = {
-    "$default" = {
+    "POST /api/v2" = {
       lambda_arn       = aws_lambda_function.event_publisher_lambda.arn,
       integration_type = "AWS_PROXY"
     }
