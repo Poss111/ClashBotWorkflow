@@ -183,6 +183,10 @@ jobs:
         - name: Terraform Init
           id: init
           run: terraform init
+
+        - name: Select Workspace
+          id: select_workspace
+          run: terraform workspace select ${{ vars.WORKSPACE }}
   
         - name: Terraform Apply
           id: apply
