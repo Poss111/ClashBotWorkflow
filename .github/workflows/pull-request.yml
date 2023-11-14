@@ -284,11 +284,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
-
-      - name: Select Workspace
-        id: workspace
-        run: terraform workspace select ${{ vars.WORKSPACE }} || terraform workspace new ${{ vars.WORKSPACE }}
+        run: terraform init -backend-config=/backend-configs/${{ vars.ENVIRONMENT }}.hcl
 
       - name: Terraform Validate
         id: validate
