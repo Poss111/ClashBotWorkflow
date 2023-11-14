@@ -224,10 +224,6 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Select Workspace
-        id: select_workspace
-        run: terraform workspace select ${{ vars.WORKSPACE }}
-
       - name: Terraform Plan
         id: plan
         if: github.event_name == 'pull_request'

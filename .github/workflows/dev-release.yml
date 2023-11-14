@@ -179,14 +179,10 @@ jobs:
           uses: hashicorp/setup-terraform@v1
           with:
             cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
-  
+            
         - name: Terraform Init
           id: init
           run: terraform init
-
-        - name: Select Workspace
-          id: select_workspace
-          run: terraform workspace select ${{ vars.WORKSPACE }}
   
         - name: Terraform Apply
           id: apply
