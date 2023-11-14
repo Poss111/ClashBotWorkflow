@@ -92,11 +92,9 @@ jobs:
               body: output
             })
 
-  eventPublisher:
-    name: Event Publisher Lambda Build & Deploy
+  eventPublisherBuild:
+    name: Event Publisher Lambda Build
     runs-on: ubuntu-latest
-    environment: 
-      name: Development
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-publisher
@@ -123,6 +121,35 @@ jobs:
       - name: Test
         run: npm test
 
+  eventPublisherDeploy:
+    name: Event Publisher Lambda Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-publisher
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - terraformPreReqs
+      - eventPublisherBuild
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install depedencies
+        run: npm install --prod
+
       - name: Build
         run: npm run build
   
@@ -134,27 +161,24 @@ jobs:
 
       - name: Archive and Publish
         run: |
-          zip -r ./event-publisher-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
-          aws s3 cp ./event-publisher-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+          zip -r ./event-publisher.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-publisher.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-publisher-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
+          path: ./event-publisher.tar.gz
           if-no-files-found: error
 
-  eventHandler:
-    name: Event Handler Lambda Build & Deploy
+  eventHandlerBuild:
+    name: Event Handler Lambda Build
     runs-on: ubuntu-latest
     environment: 
       name: Development
     defaults:
       run:
         working-directory: ./functions/clash-bot/event-handler
-    permissions:
-      id-token: write
-      contents: read
     needs: 
       - terraformPreReqs
     
@@ -175,6 +199,35 @@ jobs:
       - name: Test
         run: npm test
 
+  eventHandlerDeploy:
+    name: Event Handler Lambda Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-handler
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - terraformPreReqs
+      - eventHandlerBuild
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install --production
+
       - name: Build
         run: npm run build
   
@@ -186,14 +239,14 @@ jobs:
 
       - name: Archive and Publish
         run: |
-          zip -r ./event-handler-${{ github.run_number }}.zip ./prod ./node_modules ./package.json
-          aws s3 cp ./event-handler-${{ github.run_number }}.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+          zip -r ./event-handler.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./event-handler.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v2
         with:
           name: event-handler-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
+          path: ./event-handler.tar.gz
           if-no-files-found: error
 
   terraformWorkflow:
@@ -210,8 +263,8 @@ jobs:
       pull-requests: write
     needs: 
       - terraformPreReqs
-      - eventPublisher
-      - eventHandler
+      - eventPublisherDeploy
+      - eventHandlerDeploy
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
