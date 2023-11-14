@@ -23,8 +23,13 @@ module "api_gateway" {
   integrations = {
     "POST /api/v2/teams" = {
       lambda_arn       = aws_lambda_function.event_publisher_lambda.arn,
-      integration_type = "AWS_PROXY"
+      integration_type = "AWS_PROXY",
     }
+  }
+
+  default_route_settings = {
+    throttling_burst_limit = 5
+    throttling_rate_limit  = 5.0
   }
 }
 

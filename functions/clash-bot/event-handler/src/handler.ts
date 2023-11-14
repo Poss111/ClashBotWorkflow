@@ -9,7 +9,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
     const eventMap = setupSFMap();
     logger.info(`Recieved ${event.Records.length} events...`);
 
-    event.Records.forEach(record => {
+    let promises = event.Records.map(record => {
         logger.info(`Processing event ${record.messageId}...`);
         const client = new SFNClient({});
 
@@ -18,16 +18,26 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
 
         if (!sfArn) {
             logger.error(`Unmapped event found event=${parsedEvent.event}`);
-            throw new Error('Failed to map event.');
+            return null;
         }
 
-        client.send(new StartExecutionCommand({
+        logger.info(`Setting up payload to trigger SFN ${sfArn}...`);
+
+        return client.send(new StartExecutionCommand({
             stateMachineArn: sfArn,
             name: `${parsedEvent.event}-${record.messageId}`,
             input: JSON.stringify(parsedEvent.payload),
             traceHeader: record.messageId
         }));
     });
+
+    promises = promises.filter(p => p !== null);
+
+    logger.info("Waiting for all promises to resolve...");
+
+    await Promise.all(promises);
+
+    logger.info("All promises resolved.");
 };
 
 function setupSFMap(): Map<EVENT_TYPE, string> {
