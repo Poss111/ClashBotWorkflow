@@ -34,7 +34,8 @@ describe('Publish an event to SQS with an event type.', () => {
         await handler(eventTwo, setupContext(), {} as any);
         await expect(snsMock).toHaveReceivedCommandWith(SendMessageCommand, {
             QueueUrl: process.env.QUEUE_URL,
-            MessageBody: JSON.stringify(expectedEventToBeSent)
+            MessageBody: JSON.stringify(expectedEventToBeSent),
+            MessageGroupId: 'event',
         });
     });
 

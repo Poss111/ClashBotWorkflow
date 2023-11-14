@@ -34,7 +34,8 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         };
         const input: SendMessageCommandInput = {
             QueueUrl: process.env.QUEUE_URL,
-            MessageBody: JSON.stringify(eventToBeSent)
+            MessageBody: JSON.stringify(eventToBeSent),
+            MessageGroupId: 'event',
         };
         const message = new SendMessageCommand(input);
         const response = await sqsClient
