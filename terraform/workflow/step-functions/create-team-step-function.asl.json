@@ -1,0 +1,16 @@
+{
+  "Comment": "Creates a Clash Bot team for a Discord Service if the user is able to.",
+  "StartAt": "CreateTeam",
+  "States": {
+    "CreateTeam": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.Payload",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "${CreateTeamLambdaFunctionArn}"
+      },
+      "End": true
+    }
+  }
+}

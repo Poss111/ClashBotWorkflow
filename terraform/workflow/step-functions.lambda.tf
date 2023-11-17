@@ -1,25 +1,11 @@
 module "create_team_step_function" {
   source = "terraform-aws-modules/step-functions/aws"
 
-  name       = "retrieve-teams-${var.environment}"
-  definition = <<EOF
-  {
-    "Comment": "A Hello World example of the Amazon States Language using Pass states",
-    "StartAt": "Hello",
-    "States": {
-      "Hello": {
-        "Type": "Pass",
-        "Result": "Hello",
-        "Next": "World"
-      },
-      "World": {
-        "Type": "Pass",
-        "Result": "World",
-        "End": true
-      }
+  name = "create-team-${var.environment}"
+  definition = templatefile("${path.module}/step-functions/create-team-step-function.asl.json", {
+    CreateTeamLambdaFunctionArn = aws_lambda_function.test_lambda.arn
     }
-  }
-  EOF
+  )
 
   service_integrations = {
     dynamodb = {

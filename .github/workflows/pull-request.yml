@@ -244,6 +244,82 @@ jobs:
           path: ./functions/clash-bot/event-handler/event-handler.zip
           if-no-files-found: error
 
+  createTeamHandlerBuild:
+    name: Create Team Handler Lambda Build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/team/create
+    needs: 
+      - terraformPreReqs
+    
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Test
+        run: npm test
+
+  createTeamHandlerDeploy:
+    name: Create Team Handler Lambda Deploy
+    runs-on: ubuntu-latest
+    environment: 
+      name: Development
+    defaults:
+      run:
+        working-directory: ./functions/clash-bot/event-handler
+    permissions:
+      id-token: write
+      contents: read
+    needs: 
+      - terraformPreReqs
+      - eventHandlerBuild
+
+    steps:
+      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '16'
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build
+        run: npm run build
+  
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
+        with:
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
+
+      - name: Archive and Publish
+        run: |
+          zip -r ./create-team.zip ./prod ./node_modules ./package.json
+          aws s3 cp ./create-team.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: create-team-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
+          path: ./functions/clash-bot/team/create/create-team.zip
+          if-no-files-found: error
+
   terraformWorkflow:
     name: Workflow Apply
     runs-on: ubuntu-latest
