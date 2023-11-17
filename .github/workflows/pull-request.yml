@@ -136,6 +136,17 @@ jobs:
     needs:
       - terraformPreReqs
 
+  isTournamentEligible:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/team/is-tournament-eligible
+      artifact-name: is-tournament-eligible
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
   terraformWorkflow:
     name: Workflow Apply
     runs-on: ubuntu-latest
@@ -153,6 +164,7 @@ jobs:
       - eventPublisher
       - createTeam
       - retrieveTeams
+      - isTournamentEligible
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -193,6 +205,7 @@ jobs:
           TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
           TF_VAR_create_team_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
           TF_VAR_retrieve_teams_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/retrieve-teams.zip
+          TF_VAR_tournament_eligibility_lambda_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/is-tournament-eligible.zip
           TF_VAR_sqs_batch_size: "1"
         run: terraform apply -no-color -input=false --auto-approve
 

@@ -35,6 +35,11 @@ variable "retrieve_teams_artifact_path" {
   description = "Path to the artifact for the retrieve team lambda function."
 }
 
+variable "tournament_eligibility_lambda_artifact_path" {
+  type = string
+  description = "Path to the artifact for the tournament eligibility lambda function."
+}
+
 variable "sqs_batch_size" {
   type        = number
   default     = 1
