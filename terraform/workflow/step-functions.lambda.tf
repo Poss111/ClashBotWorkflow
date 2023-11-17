@@ -103,7 +103,7 @@ module "retrieve_team_lambda" {
   iam_policy_json = templatefile(
     "${path.module}/policies/retrieve-teams-lambda-policy.json",
     {
-      SQS_ARN = module.clash_bot_event_sqs.queue_arn
+      DYNAMODB_ARN = module.dynamodb_table.dynamodb_table_arn
     }
   )
 }
@@ -124,7 +124,7 @@ module "tournament_eligibility_lambda" {
   iam_policy_json = templatefile(
     "${path.module}/policies/tournament-eligibility-lambda-policy.json",
     {
-      SQS_ARN = module.clash_bot_event_sqs.queue_arn
+      DYNAMODB_ARN = module.dynamodb_table.dynamodb_table_arn
     }
   )
 }
