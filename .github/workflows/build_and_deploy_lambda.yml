@@ -68,6 +68,6 @@ jobs:
             - name: Upload Artifacts
               uses: actions/upload-artifact@v2
               with:
-                name: event-publisher-${{ inputs.environment-name }}-${{ github.run_number }}
+                name: ${{ inputs.artifact-name }}-${{ inputs.environment-name }}-${{ github.run_number }}
                 path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
                 if-no-files-found: error

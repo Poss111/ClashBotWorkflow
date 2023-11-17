@@ -30,7 +30,7 @@ variable "create_team_artifact_path" {
   description = "Path to the artifact for the create team lambda function."
 }
 
-variable "retrieve_team_artifact_path" {
+variable "retrieve_teams_artifact_path" {
   type        = string
   description = "Path to the artifact for the retrieve team lambda function."
 }
