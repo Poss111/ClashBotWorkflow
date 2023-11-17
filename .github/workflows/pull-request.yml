@@ -92,230 +92,41 @@ jobs:
               body: output
             })
 
-  eventPublisherBuild:
-    name: Event Publisher Lambda Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-publisher
-    needs: 
-      - terraformPreReqs
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+  eventPublisher:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    with:
+      working-directory: ./functions/clash-bot/event-publisher
+      artifact-name: event-publisher
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment: Development
+      aws-region: us-east-1
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
+  eventHandler:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    with:
+      working-directory: ./functions/clash-bot/event-handler
+      artifact-name: event-handler
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment: Development
+      aws-region: us-east-1
 
-      - name: Install depedencies
-        run: npm install
+  createTeam:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    with:
+      working-directory: ./functions/clash-bot/team/create
+      artifact-name: create-team
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment: Development
+      aws-region: us-east-1
 
-      - name: Test
-        run: npm test
-
-  eventPublisherDeploy:
-    name: Event Publisher Lambda Deploy
-    runs-on: ubuntu-latest
-    environment: 
-      name: Development
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-publisher
-    permissions:
-      id-token: write
-      contents: read
-    needs:
-      - eventPublisherBuild
-
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install depedencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-  
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
-      - name: Archive and Publish
-        run: |
-          zip -r ./event-publisher.zip ./prod ./node_modules ./package.json
-          aws s3 cp ./event-publisher.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-publisher-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./functions/clash-bot/event-publisher/event-publisher.zip
-          if-no-files-found: error
-
-  eventHandlerBuild:
-    name: Event Handler Lambda Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-handler
-    needs: 
-      - terraformPreReqs
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-  eventHandlerDeploy:
-    name: Event Handler Lambda Deploy
-    runs-on: ubuntu-latest
-    environment: 
-      name: Development
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-handler
-    permissions:
-      id-token: write
-      contents: read
-    needs:
-      - eventHandlerBuild
-
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-  
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
-      - name: Archive and Publish
-        run: |
-          zip -r ./event-handler.zip ./prod ./node_modules ./package.json
-          aws s3 cp ./event-handler.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-handler-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./functions/clash-bot/event-handler/event-handler.zip
-          if-no-files-found: error
-
-  createTeamHandlerBuild:
-    name: Create Team Handler Lambda Build
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/team/create
-    needs: 
-      - terraformPreReqs
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-  createTeamHandlerDeploy:
-    name: Create Team Handler Lambda Deploy
-    runs-on: ubuntu-latest
-    environment: 
-      name: Development
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/team/create
-    permissions:
-      id-token: write
-      contents: read
-    needs:
-      - createTeamHandlerBuild
-
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build
-        run: npm run build
-  
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
-
-      - name: Archive and Publish
-        run: |
-          zip -r ./create-team.zip ./prod ./node_modules ./package.json
-          aws s3 cp ./create-team.zip s3://${{ vars.S3_BUCKET_NAME }}/artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: create-team-${{ vars.ENVIRONMENT}}-${{ github.run_number }}
-          path: ./functions/clash-bot/team/create/create-team.zip
-          if-no-files-found: error
+  retrieveTeams:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    with:
+      working-directory: ./functions/clash-bot/team/retrieve
+      artifact-name: retrieve-teams
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment: Development
+      aws-region: us-east-1
 
   terraformWorkflow:
     name: Workflow Apply
@@ -330,9 +141,10 @@ jobs:
       contents: read
       pull-requests: write
     needs:
-      - eventPublisherDeploy
-      - eventHandlerDeploy
-      - createTeamHandlerDeploy
+      - eventHandler
+      - eventPublisher
+      - createTeam
+      - retrieveTeams
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -372,6 +184,7 @@ jobs:
           TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
           TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
           TF_VAR_create_team_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
+          TF_VAR_retrieve_teams_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/retrieve-teams.zip
           TF_VAR_sqs_batch_size: "1"
         run: terraform apply -no-color -input=false --auto-approve
 

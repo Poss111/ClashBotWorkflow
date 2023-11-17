@@ -1,7 +1,42 @@
 {
   "Comment": "Creates a Clash Bot team for a Discord Service if the user is able to.",
-  "StartAt": "CreateTeam",
+  "StartAt": "RetrieveTeamsForTournament",
   "States": {
+    "RetrieveTeamsForTournament": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload": {
+          "tournamantName": "$.Payload.tournament.tournamentName",
+          "tournamentDay": "$.Payload.tournament.tournamentDay"
+        },
+        "FunctionName": "${RetrieveTeamsForTournamentLambdaFunctionArn}"
+      },
+      "OutputPath": "$.Payload",
+      "Next": "CanTeamBeCreated",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "DefaultErrorHandler"
+        }
+      ]
+    },
+    "CanTeamBeCreated": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.teamCreated",
+          "BooleanEquals": true,
+          "Next": "TeamAlreadyCreated"
+        }
+      ],
+      "Default": "CreateTeam"
+    },
+    "TeamAlreadyCreated": {
+      "Type": "Pass",
+      "Result": "Team already created",
+      "End": true
+    },
     "CreateTeam": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
@@ -10,6 +45,17 @@
         "Payload.$": "$",
         "FunctionName": "${CreateTeamLambdaFunctionArn}"
       },
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "Next": "DefaultErrorHandler"
+        }
+      ],
+      "End": true
+    },
+    "DefaultErrorHandler": {
+      "Type": "Pass",
+      "Result": "An error occurred",
       "End": true
     }
   }

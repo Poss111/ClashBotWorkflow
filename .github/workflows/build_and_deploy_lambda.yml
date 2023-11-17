@@ -1,0 +1,72 @@
+on:
+    workflow_call:
+        inputs:
+            working-directory:
+                description: 'The working directory to run the commands in'
+                required: true
+                type: string
+            artifact-name:
+                description: 'The name of the artifact to upload'
+                required: true
+                type: string
+            environment-name:
+                description: 'The name of the environment to deploy to'
+                required: true
+                type: string
+            s3-bucket-name:
+                description: 'The name of the S3 bucket to upload the artifact to'
+                required: true
+                type: string
+            region:
+                description: 'The AWS region to deploy to'
+                required: true
+                type: string
+                default: 'us-east-1'
+
+jobs:
+    buildAndDeployLambda:
+        name: Lambda Build and Deploy to S3
+        runs-on: ubuntu-latest
+        defaults:
+            run:
+                working-directory: ${{ inputs.working-directory }}
+        environment:
+            name: ${{ inputs.environment-name }}
+        permissions:
+            id-token: write
+            contents: read
+        
+        steps:
+            - uses: FranzDiebold/github-env-vars-action@v2.1.0
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v2
+              with:
+                node-version: '16'
+            
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Install depedencies
+              run: npm install
+
+            - name: Test
+              run: npm test
+
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@v3
+              with:
+                role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+                aws-region: ${{ inputs.region }}
+
+            - name: Archive and Publish
+              run: |
+                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
+                aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ toLower(inputs.environment-name) }}/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
+
+            - name: Upload Artifacts
+              uses: actions/upload-artifact@v2
+              with:
+                name: event-publisher-${{ toLower(inputs.environment-name) }}-${{ github.run_number }}
+                path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
+                if-no-files-found: error
