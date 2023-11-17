@@ -93,7 +93,7 @@ jobs:
             })
 
   eventPublisher:
-    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
       working-directory: ./functions/clash-bot/event-publisher
       artifact-name: event-publisher
@@ -102,7 +102,7 @@ jobs:
       aws-region: us-east-1
 
   eventHandler:
-    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
       working-directory: ./functions/clash-bot/event-handler
       artifact-name: event-handler
@@ -111,7 +111,7 @@ jobs:
       aws-region: us-east-1
 
   createTeam:
-    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
       working-directory: ./functions/clash-bot/team/create
       artifact-name: create-team
@@ -120,7 +120,7 @@ jobs:
       aws-region: us-east-1
 
   retrieveTeams:
-    uses: ./.github/workflows/build_and_deploy_lambda.yml@eventPublisher
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
       working-directory: ./functions/clash-bot/team/retrieve
       artifact-name: retrieve-teams
