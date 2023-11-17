@@ -36,7 +36,7 @@ variable "retrieve_teams_artifact_path" {
 }
 
 variable "tournament_eligibility_lambda_artifact_path" {
-  type = string
+  type        = string
   description = "Path to the artifact for the tournament eligibility lambda function."
 }
 
