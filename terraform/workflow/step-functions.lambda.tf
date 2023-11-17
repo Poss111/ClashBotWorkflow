@@ -34,7 +34,7 @@ module "create_team_lambda" {
   iam_policy_json = templatefile(
     "${path.module}/policies/create-team-lambda-policy.json",
     {
-      DYNAMODB_TABLE_ARN = module.dynamodb_table.dynamodb_table_arn
+      DYNAMODB_ARN = module.dynamodb_table.dynamodb_table_arn
     }
   )
 }
