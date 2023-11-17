@@ -51,6 +51,9 @@ jobs:
             - name: Test
               run: npm test
 
+            - name: Build Artifact
+              run: npm run build
+
             - name: Configure AWS Credentials
               uses: aws-actions/configure-aws-credentials@v3
               with:
@@ -59,7 +62,8 @@ jobs:
 
             - name: Archive and Publish
               run: |
-                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
+                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./package.json
+                ls -lha
                 aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
                 
             - name: Upload Artifacts
