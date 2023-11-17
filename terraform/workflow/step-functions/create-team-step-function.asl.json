@@ -10,7 +10,7 @@
           "tournamantName": "$.Payload.tournament.tournamentName",
           "tournamentDay": "$.Payload.tournament.tournamentDay"
         },
-        "FunctionName": "${RetrieveTeamsForTournamentLambdaFunctionArn}"
+        "FunctionName": "${RetrieveTeamLambdaFunctionArn}"
       },
       "OutputPath": "$.Payload",
       "Next": "CanTeamBeCreated",
