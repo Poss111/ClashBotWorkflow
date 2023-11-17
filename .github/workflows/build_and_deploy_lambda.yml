@@ -39,9 +39,6 @@ jobs:
         steps:
             - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
-            - name: Convert environment name to lowercase
-              run: echo "ENVIRONMENT_NAME=$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')" >> $GITHUB_ENV
-
             - name: Setup Node.js
               uses: actions/setup-node@v2
               with:
@@ -50,7 +47,7 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
-            - name: Install depedencies
+            - name: Install dependencies
               run: npm install
 
             - name: Test
