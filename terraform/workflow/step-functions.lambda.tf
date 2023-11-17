@@ -3,7 +3,7 @@ module "create_team_step_function" {
 
   name = "create-team-${var.environment}"
   definition = templatefile("${path.module}/step-functions/create-team-step-function.asl.json", {
-    CreateTeamLambdaFunctionArn = aws_lambda_function.create_team_lambda.arn,
+    CreateTeamLambdaFunctionArn   = aws_lambda_function.create_team_lambda.arn,
     RetrieveTeamLambdaFunctionArn = aws_lambda_function.retrieve_team_lambda.arn,
     }
   )

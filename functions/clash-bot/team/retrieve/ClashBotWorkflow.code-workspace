@@ -2,30 +2,6 @@
 	"folders": [
 		{
 			"path": "../../../.."
-		},
-		{
-			"name": "clash-bot-shared",
-			"path": "../../clash-bot-shared"
-		},
-		{
-			"name": "create",
-			"path": "../create"
-		},
-		{
-			"name": "retrieve",
-			"path": "."
-		},
-		{
-			"name": "event-publisher",
-			"path": "../../event-publisher"
-		},
-		{
-			"name": "prod",
-			"path": "../../event-publisher/prod"
-		},
-		{
-			"name": "event-handler",
-			"path": "../../event-handler"
 		}
 	],
 	"settings": {
