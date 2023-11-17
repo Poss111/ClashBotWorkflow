@@ -129,8 +129,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: 
-      - terraformPreReqs
+    needs:
       - eventPublisherBuild
 
     steps:
@@ -205,8 +204,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: 
-      - terraformPreReqs
+    needs:
       - eventHandlerBuild
 
     steps:
@@ -281,8 +279,7 @@ jobs:
     permissions:
       id-token: write
       contents: read
-    needs: 
-      - terraformPreReqs
+    needs:
       - createTeamHandlerBuild
 
     steps:
@@ -332,10 +329,10 @@ jobs:
       id-token: write
       contents: read
       pull-requests: write
-    needs: 
-      - terraformPreReqs
+    needs:
       - eventPublisherDeploy
       - eventHandlerDeploy
+      - createTeamHandlerDeploy
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
