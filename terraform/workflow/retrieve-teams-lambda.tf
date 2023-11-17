@@ -5,7 +5,7 @@ resource "aws_lambda_function" "retrieve_team_lambda" {
   role          = aws_iam_role.retrieve_team_lambda_exec.arn
 
   s3_bucket = var.s3_bucket_name
-  s3_key    = var.retrieve_team_artifact_path
+  s3_key    = var.retrieve_teams_artifact_path
 
   environment {
     variables = {
