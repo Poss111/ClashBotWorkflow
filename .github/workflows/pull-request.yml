@@ -99,7 +99,7 @@ jobs:
       artifact-name: event-publisher
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
-      aws-region: us-east-1
+      region: us-east-1
     needs:
       - terraformPreReqs
 
@@ -110,7 +110,7 @@ jobs:
       artifact-name: event-handler
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
-      aws-region: us-east-1
+      region: us-east-1
     needs:
       - terraformPreReqs
 
@@ -121,7 +121,7 @@ jobs:
       artifact-name: create-team
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
-      aws-region: us-east-1
+      region: us-east-1
     needs:
       - terraformPreReqs
 
@@ -132,7 +132,7 @@ jobs:
       artifact-name: retrieve-teams
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
-      aws-region: us-east-1
+      region: us-east-1
     needs:
       - terraformPreReqs
 
