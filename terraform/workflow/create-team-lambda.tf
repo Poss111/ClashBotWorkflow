@@ -59,7 +59,7 @@ data "aws_iam_policy_document" "create_team_policy_document" {
       "dynamodb:BatchWriteItem"
     ]
     resources = [
-      moduel.dynamodb_table.dynamodb_table_arn
+      module.dynamodb_table.dynamodb_table_arn
     ]
   }
 }
