@@ -98,8 +98,10 @@ jobs:
       working-directory: ./functions/clash-bot/event-publisher
       artifact-name: event-publisher
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
-      environment: Development
+      environment-name: Development
       aws-region: us-east-1
+    needs:
+      - terraformPreReqs
 
   eventHandler:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
@@ -107,8 +109,10 @@ jobs:
       working-directory: ./functions/clash-bot/event-handler
       artifact-name: event-handler
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
-      environment: Development
+      environment-name: Development
       aws-region: us-east-1
+    needs:
+      - terraformPreReqs
 
   createTeam:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
@@ -116,8 +120,10 @@ jobs:
       working-directory: ./functions/clash-bot/team/create
       artifact-name: create-team
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
-      environment: Development
+      environment-name: Development
       aws-region: us-east-1
+    needs:
+      - terraformPreReqs
 
   retrieveTeams:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
@@ -125,8 +131,10 @@ jobs:
       working-directory: ./functions/clash-bot/team/retrieve
       artifact-name: retrieve-teams
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
-      environment: Development
+      environment-name: Development
       aws-region: us-east-1
+    needs:
+      - terraformPreReqs
 
   terraformWorkflow:
     name: Workflow Apply
