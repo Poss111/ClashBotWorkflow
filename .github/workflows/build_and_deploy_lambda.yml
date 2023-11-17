@@ -38,6 +38,9 @@ jobs:
         steps:
             - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
+            - name: Convert environment name to lowercase
+              run: echo "ENVIRONMENT_NAME=$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')" >> $GITHUB_ENV
+
             - name: Setup Node.js
               uses: actions/setup-node@v2
               with:
@@ -60,11 +63,15 @@ jobs:
             - name: Archive and Publish
               run: |
                 zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
+<<<<<<< HEAD
                 aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ toLower(inputs.environment-name) }}/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
+=======
+                aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ env.ENVIRONMENT_NAME }}/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
+>>>>>>> main
                 
             - name: Upload Artifacts
               uses: actions/upload-artifact@v2
               with:
-                name: event-publisher-${{ toLower(inputs.environment-name) }}-${{ github.run_number }}
+                name: event-publisher-${{ env.ENVIRONMENT_NAME }}-${{ github.run_number }}
                 path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
                 if-no-files-found: error
