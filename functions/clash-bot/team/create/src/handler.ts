@@ -14,27 +14,35 @@ export const handler: Handler = async (event, context) => {
     const dynamoDbClient = new DynamoDBClient({});
 
     const teamEvent = event as Team;
+
+    if (teamEvent.playerDetails === undefined) {
+        return {
+            status: 'Failed',
+            details: 'Player details are required to create a team.',
+            originalRecord: event
+        };
+    } else {
+        // Define the item to add to the table
+        const item: PutItemCommandInput = {
+            TableName: process.env.TABLE_NAME,
+            Item: {
+                "type": { S: "Team" },
+                "id": { S: uuidv4() },
+                "playerDetails": { S: JSON.stringify(teamEvent.playerDetails) ?? '' },
+                "serverId": { S: teamEvent.serverId ?? ''},
+                "tournament": { S: JSON.stringify(teamEvent.tournament) ?? '' },
+                "lastUpdatedAt": { S: new Date().toISOString() }
+            }
+        };
+        
+        // Create a new PutItemCommand
+        const command = new PutItemCommand(item);
+        await dynamoDbClient.send(command);
     
-    // Define the item to add to the table
-    const item: PutItemCommandInput = {
-        TableName: process.env.TABLE_NAME,
-        Item: {
-            "type": { S: "Team" },
-            "id": { S: uuidv4() },
-            "playerDetails": { S: JSON.stringify(teamEvent.playerDetails) ?? '' },
-            "serverId": { S: teamEvent.serverId ?? ''},
-            "tournament": { S: JSON.stringify(teamEvent.tournament) ?? '' },
-            "lastUpdatedAt": { S: new Date().toISOString() }
-        }
-    };
-    
-    // Create a new PutItemCommand
-    const command = new PutItemCommand(item);
-    await dynamoDbClient.send(command);
-  
-    return { 
-        status: 'Done',
-        updatedRecord: event,
-        originalRecord: event
-    };
+        return { 
+            status: 'Done',
+            updatedRecord: event,
+            originalRecord: event
+        };
+    }
 };

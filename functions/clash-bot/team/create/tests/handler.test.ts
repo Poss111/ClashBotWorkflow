@@ -51,4 +51,26 @@ describe('handler', () => {
             }
         });
     });
+
+    it('Should return a failed status if the event does not include player details', async () => {
+        // Mock the event and context objects
+        const event: Team = {
+            serverId: 'serverId',
+            tournament: {
+                tournamentName: 'tournamentName',
+                tournamentDay: '1'
+            },
+        };
+        const context = { /* mock context object */ };
+
+        // Call the handler function
+        const result = await handler(event, context as any, {} as any);
+
+        // Assert the result
+        expect(result).toEqual({ 
+            status: 'Failed',
+            details: 'Player details are required to create a team.',
+            originalRecord: event
+        });
+    });
 });
