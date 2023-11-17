@@ -65,11 +65,11 @@ jobs:
             - name: Archive and Publish
               run: |
                 zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
-                aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ env.ENVIRONMENT_NAME }}/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
+                aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
                 
             - name: Upload Artifacts
               uses: actions/upload-artifact@v2
               with:
-                name: event-publisher-${{ env.ENVIRONMENT_NAME }}-${{ github.run_number }}
+                name: event-publisher-${{ inputs.environment-name }}-${{ github.run_number }}
                 path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
                 if-no-files-found: error
