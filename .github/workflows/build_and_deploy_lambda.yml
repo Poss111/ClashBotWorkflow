@@ -35,7 +35,6 @@ jobs:
         permissions:
             id-token: write
             contents: read
-        
         steps:
             - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
@@ -43,7 +42,6 @@ jobs:
               uses: actions/setup-node@v2
               with:
                 node-version: '16'
-            
             - name: Checkout
               uses: actions/checkout@v2
 
@@ -63,7 +61,7 @@ jobs:
               run: |
                 zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
                 aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ toLower(inputs.environment-name) }}/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
-
+                
             - name: Upload Artifacts
               uses: actions/upload-artifact@v2
               with:
