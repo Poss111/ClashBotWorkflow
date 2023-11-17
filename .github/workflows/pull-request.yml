@@ -277,7 +277,7 @@ jobs:
       name: Development
     defaults:
       run:
-        working-directory: ./functions/clash-bot/event-handler
+        working-directory: ./functions/clash-bot/team/create
     permissions:
       id-token: write
       contents: read
@@ -374,6 +374,7 @@ jobs:
           TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
           TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
           TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+          TF_VAR_create_team_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
           TF_VAR_sqs_batch_size: "1"
         run: terraform apply -no-color -input=false --auto-approve
 
