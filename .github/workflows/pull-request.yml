@@ -95,7 +95,7 @@ jobs:
   eventPublisher:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
-      working-directory: ./functions/clash-bot/event-publisher
+      working-directory: functions/clash-bot/event-publisher
       artifact-name: event-publisher
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
@@ -106,7 +106,7 @@ jobs:
   eventHandler:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
-      working-directory: ./functions/clash-bot/event-handler
+      working-directory: functions/clash-bot/event-handler
       artifact-name: event-handler
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
@@ -117,7 +117,7 @@ jobs:
   createTeam:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
-      working-directory: ./functions/clash-bot/team/create
+      working-directory: functions/clash-bot/team/create
       artifact-name: create-team
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
@@ -128,7 +128,7 @@ jobs:
   retrieveTeams:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
-      working-directory: ./functions/clash-bot/team/retrieve
+      working-directory: functions/clash-bot/team/retrieve
       artifact-name: retrieve-teams
       s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
       environment-name: Development
