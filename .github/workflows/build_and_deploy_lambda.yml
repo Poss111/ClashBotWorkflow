@@ -58,18 +58,21 @@ jobs:
               run: npm install
 
             - name: Build Artifact
+              env:
+                HASH: ${{ hashFiles('**/lambda-artifact.zip') }}
               run: |
                 npm run build
-                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./package.json
+                zip -r ./lambda-artifact.zip ./prod ./package.json
+                echo "Calulated hash: $HASH"
 
             - name: Cache lambda artifact
               id: cache
               uses: actions/cache@v2
               with:
-                path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
-                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/${{ inputs.artifact-name }}.zip') }}
+                path: ${{ inputs.working-directory}}/lambda-artifact.zip
+                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/lambda-artifact.zip') }}
                 restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/${{ inputs.artifact-name }}.zip') }}
+                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/lambda-artifact.zip') }}
 
             - name: Test
               if: steps.cache.outputs.cache-hit != 'true'
@@ -85,4 +88,4 @@ jobs:
             - name: Archive and Publish
               if: steps.cache.outputs.cache-hit != 'true'
               run: |
-                aws s3 cp ./${{ inputs.artifact-name}}.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ inputs.artifact-name}}/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/artifact-${{ github.run_number }}.zip
+                aws s3 cp ./lambda-artifact.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ inputs.artifact-name}}/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/artifact-${{ github.run_number }}.zip
