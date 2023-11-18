@@ -5,7 +5,7 @@ ARTIFACT_NAME=${2}
 ENVIRONMENT=${3}
 
 # List objects in the S3 bucket path
-OBJECTS=$(aws s3 ls s3://$BUCKET_NAME/artifacts/$ARTIFACT_NAME/$ENVIRONMENT --recursive --profile=Master | awk '{print $4}')
+OBJECTS=$(aws s3 ls s3://$BUCKET_NAME/artifacts/$ARTIFACT_NAME/$ENVIRONMENT --recursive | awk '{print $4}')
 
 # Extract numbers from the object names and find the maximum number artifact
 ARTIFACT_PATH=""
