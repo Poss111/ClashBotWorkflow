@@ -61,7 +61,7 @@ jobs:
                 path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
                 key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
                 restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-
+                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
 
             - name: Install dependencies
               if: steps.cache.outputs.cache-hit != 'true'
