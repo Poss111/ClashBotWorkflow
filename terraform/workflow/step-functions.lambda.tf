@@ -145,3 +145,19 @@ resource "aws_lambda_permission" "apigw" {
   # within the API Gateway "REST API".
   source_arn = "${module.api_gateway.apigatewayv2_api_execution_arn}/*/*"
 }
+
+resource "aws_lambda_permission" "tournament_eligibility_permission" {
+  statement_id  = "TournamentEligibilityPermission-${lower(var.environment)}"
+  action        = "lambda:InvokeFunction"
+  function_name = module.tournament_eligibility_lambda.name
+  principal     = "states.amazonaws.com"
+  source_arn    = module.create_team_step_function.state_machine_arn
+}
+
+resource "aws_lambda_permission" "create_team_permission" {
+  statement_id  = "CreateTeamPermission-${lower(var.environment)}"
+  action        = "lambda:InvokeFunction"
+  function_name = module.create_team_step_function.name
+  principal     = "states.amazonaws.com"
+  source_arn    = module.create_team_step_function.state_machine_arn
+}
