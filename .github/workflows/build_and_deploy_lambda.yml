@@ -41,27 +41,6 @@ jobs:
             - name: Checkout
               uses: actions/checkout@v2
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v2
-              with:
-                node-version: '16'
-
-            - name: Cache Node.js modules
-              uses: actions/cache@v2
-              with:
-                path: ~/.npm  # npm cache files are stored in `~/.npm` on Linux/macOS
-                key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-                restore-keys: |
-                  ${{ runner.os }}-node-
-
-            - name: Install dependencies
-              run: npm install
-
-            - name: Build Artifact
-              run: |
-                npm run build
-                zip -r ./lambda-artifact.zip ./prod ./package.json
-
             - name: Generate hash
               id: generate-hash
               run: |
@@ -76,6 +55,30 @@ jobs:
                 key: ${{ inputs.artifact-name }}-lambda-${{ steps.generate-hash.outputs.hash }}
                 restore-keys: |
                   ${{ inputs.artifact-name }}-lambda-
+
+            - name: Setup Node.js
+              if: steps.cache.outputs.cache-hit != 'true'
+              uses: actions/setup-node@v2
+              with:
+                node-version: '16'
+
+            - name: Cache Node.js modules
+              uses: actions/cache@v2
+              if: steps.cache.outputs.cache-hit != 'true'
+              with:
+                path: ~/.npm  # npm cache files are stored in `~/.npm` on Linux/macOS
+                key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-node-
+
+            - name: Install dependencies
+              run: npm install
+
+            - name: Build Artifact
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: |
+                npm run build
+                zip -r ./lambda-artifact.zip ./prod ./package.json
 
             - name: Test
               if: steps.cache.outputs.cache-hit != 'true'
