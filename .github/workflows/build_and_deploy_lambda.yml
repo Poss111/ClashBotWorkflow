@@ -58,7 +58,9 @@ jobs:
               run: npm install
 
             - name: Build Artifact
-              run: npm run build
+              run: |
+                npm run build
+                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./package.json
 
             - name: Cache lambda artifact
               id: cache
@@ -83,5 +85,4 @@ jobs:
             - name: Archive and Publish
               if: steps.cache.outputs.cache-hit != 'true'
               run: |
-                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./package.json ./artifact-name.txt
                 aws s3 cp ./${{ inputs.artifact-name}}.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ inputs.artifact-name}}/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/artifact-${{ github.run_number }}.zip
