@@ -9,10 +9,12 @@ OBJECTS=$(aws s3 ls s3://$BUCKET_NAME/artifacts/$ARTIFACT_NAME/$ENVIRONMENT --re
 
 # Extract numbers from the object names and find the maximum number artifact
 ARTIFACT_PATH=""
+VERSION=0
 for object in $OBJECTS; do
   NUMBER=$(basename $object | grep -o -E '[0-9]+')
   if [[ "$NUMBER" -gt "$MAX_NUMBER" ]]; then
     ARTIFACT_PATH=$object
+    VERSION=$NUMBER
   fi
 done
 
@@ -23,6 +25,8 @@ if [[ -z "$ARTIFACT_PATH" ]]; then
 fi
 
 echo "PATH: $ARTIFACT_PATH"
+echo "ARTIFACT_VERSION: $VERSION"
 
 # Set ARTIFACT_PATH as an output
 echo "::set-output name=artifact-path::$ARTIFACT_PATH"
+echo "::set-output name=version::$VERSION"
