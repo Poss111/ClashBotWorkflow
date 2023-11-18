@@ -172,51 +172,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Restore Event Handler Artifact
-        uses: actions/cache@v2
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
-          path: event-handler.zip
-          key: event-handler-lambda-${{ github.run_id }}
-          restore-keys: |
-            event-handler-lambda-
+          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+          aws-region: us-east-1
 
-      - name: Restore Event Publisher Artifact
-        uses: actions/cache@v2
-        with:
-          path: event-handler.zip
-          key: event-publisher-lambda-${{ github.run_id }}
-          restore-keys: |
-            event-publisher-lambda-
+      - name: Find latest Event Handler artifact
+        id: eventHandlerArtifact
+        run: ./scripts/find_latest_artifact.sh event-handler ${{ vars.S3_BUCKET_NAME }} development
 
-      - name: Restore Create Team Artifact
-        uses: actions/cache@v2
-        with:
-          path: create-team.zip
-          key: create-team-lambda-${{ github.run_id }}
-          restore-keys: |
-            create-team-lambda-
+      - name: Find latest Event Publisher artifact
+        id: eventPublisherArtifact
+        run: ./scripts/find_latest_artifact.sh event-publisher ${{ vars.S3_BUCKET_NAME }} development
 
-      - name: Restore Retrieve Teams Artifact
-        uses: actions/cache@v2
-        with:
-          path: retrieve-teams.zip
-          key: retrieve-teams-lambda-${{ github.run_id }}
-          restore-keys: |
-            retrieve-teams-lambda-
+      - name: Find latest Create Team artifact
+        id: createTeamArtifact
+        run: ./scripts/find_latest_artifact.sh create-team ${{ vars.S3_BUCKET_NAME }} development
 
-      - name: Restore Is Tournament Eligible Artifact
-        uses: actions/cache@v2
-        with:
-          path: is-tournament-eligible.zip
-          key: is-tournament-eligible-lambda-${{ github.run_id }}
-          restore-keys: |
-            is-tournament-eligible-lambda-
+      - name: Find latest Retrieve Teams artifact
+        id: retrieveTeamsArtifact
+        run: ./scripts/find_latest_artifact.sh retrieve-teams ${{ vars.S3_BUCKET_NAME }} development
 
-      # - name: Configure AWS Credentials
-      #   uses: aws-actions/configure-aws-credentials@v3
-      #   with:
-      #     role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-      #     aws-region: us-east-1
+      - name: Find latest Is Tournament Eligible artifact
+        id: isTournamentEligibleArtifact
+        run: ./scripts/find_latest_artifact.sh is-tournament-eligible ${{ vars.S3_BUCKET_NAME }} development
+
+      - name: Latest Artifacts
+        run: |
+          echo "Event Handler: ${{ steps.eventHandlerArtifact.outputs.artifact-path }}"
+          echo "Event Publisher: ${{ steps.eventPublisherArtifact.outputs.artifact-path }}"
+          echo "Create Team: ${{ steps.createTeamArtifact.outputs.artifact-path }}"
+          echo "Retrieve Teams: ${{ steps.retrieveTeamsArtifact.outputs.artifact-path }}"
+          echo "Is Tournament Eligible: ${{ steps.isTournamentEligibleArtifact.outputs.artifact-path }}"
 
       # - name: Setup Terraform
       #   uses: hashicorp/setup-terraform@v1
