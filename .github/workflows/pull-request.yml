@@ -188,7 +188,29 @@ jobs:
           restore-keys: |
             event-publisher-lambda-
 
-      
+      - name: Restore Create Team Artifact
+        uses: actions/cache@v2
+        with:
+          path: create-team.zip
+          key: create-team-lambda-${{ github.run_id }}
+          restore-keys: |
+            create-team-lambda-
+
+      - name: Restore Retrieve Teams Artifact
+        uses: actions/cache@v2
+        with:
+          path: retrieve-teams.zip
+          key: retrieve-teams-lambda-${{ github.run_id }}
+          restore-keys: |
+            retrieve-teams-lambda-
+
+      - name: Restore Is Tournament Eligible Artifact
+        uses: actions/cache@v2
+        with:
+          path: is-tournament-eligible.zip
+          key: is-tournament-eligible-lambda-${{ github.run_id }}
+          restore-keys: |
+            is-tournament-eligible-lambda-
 
       # - name: Configure AWS Credentials
       #   uses: aws-actions/configure-aws-credentials@v3

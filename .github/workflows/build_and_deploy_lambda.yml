@@ -54,36 +54,36 @@ jobs:
                 restore-keys: |
                   ${{ runner.os }}-node-
 
-            - name: Cache lambda artifact
-              id: cache
-              uses: actions/cache@v2
-              with:
-                path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
-                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
-                restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-
+            # - name: Cache lambda artifact
+            #   id: cache
+            #   uses: actions/cache@v2
+            #   with:
+            #     path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
+            #     key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
+            #     restore-keys: |
+            #       ${{ inputs.artifact-name }}-lambda-
 
             - name: Install dependencies
-              if: steps.cache.outputs.cache-hit != 'true'
+              # if: steps.cache.outputs.cache-hit != 'true'
               run: npm install
 
             - name: Test
-              if: steps.cache.outputs.cache-hit != 'true'
+              # if: steps.cache.outputs.cache-hit != 'true'
               run: npm test
 
             - name: Build Artifact
-              if: steps.cache.outputs.cache-hit != 'true'
+              # if: steps.cache.outputs.cache-hit != 'true'
               run: npm run build
 
             - name: Configure AWS Credentials
-              if: steps.cache.outputs.cache-hit != 'true'
+              # if: steps.cache.outputs.cache-hit != 'true'
               uses: aws-actions/configure-aws-credentials@v3
               with:
                 role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
                 aws-region: ${{ inputs.region }}
 
             - name: Archive and Publish
-              if: steps.cache.outputs.cache-hit != 'true'
+              # if: steps.cache.outputs.cache-hit != 'true'
               run: |
                 zip -r ./${{ inputs.artifact-name}}.zip ./prod ./package.json
-                aws s3 cp ./${{ inputs.artifact-name}}.zip s3://${{ inputs.s3-bucket-name }}/artifacts/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
+                aws s3 cp ./${{ inputs.artifact-name}}.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ inputs.artifact-name}}/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/artifact-${{ github.run_number }}.zip
