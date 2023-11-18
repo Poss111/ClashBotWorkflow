@@ -67,9 +67,9 @@ jobs:
               uses: actions/cache@v2
               with:
                 path: ${{ inputs.working-directory}}/lambda-artifact.zip
-                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/lambda-artifact.zip') }}
+                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('src/**,package.json') }}
                 restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/lambda-artifact.zip') }}
+                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('src/**,package.json') }}
 
             - name: Test
               if: steps.cache.outputs.cache-hit != 'true'
