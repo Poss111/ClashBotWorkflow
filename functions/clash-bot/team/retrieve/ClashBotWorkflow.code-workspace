@@ -34,7 +34,7 @@
 	],
 	"settings": {
 		"jest.disabledWorkspaceFolders": [
-			"ClashBotWorkflow",
+			"can-create-team",
 			"prod"
 		]
 	}

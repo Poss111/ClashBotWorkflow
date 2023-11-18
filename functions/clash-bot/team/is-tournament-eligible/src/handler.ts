@@ -12,7 +12,9 @@ export const handler: Handler = async (event, context) => {
 
     if (event.tournament === undefined && event.tournamentDay === undefined) {
         logger.info('No tournament or tournament day provided.');
-        return false;
+        return {
+            isEligible: false
+        };
     }
 
     const dynamoDBClient = new DynamoDBClient({});
@@ -73,7 +75,9 @@ export const handler: Handler = async (event, context) => {
     const queryCommandOutput = await dynamoDBClient.send(queryCommand);
 
     if (queryCommandOutput.Items === undefined || queryCommandOutput.Items.length === 0) {
-        return false;
+        return {
+            isEligible: false
+        };
     } else {
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); 
@@ -87,6 +91,8 @@ export const handler: Handler = async (event, context) => {
                 return tournamentIsEligible;
             });
 
-        return tournaments.length > 0;
+        return {
+            isEligible: tournaments.length > 0
+        };
     }
 };

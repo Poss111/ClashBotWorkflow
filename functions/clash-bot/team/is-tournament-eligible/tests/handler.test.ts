@@ -26,7 +26,9 @@ describe('handler', () => {
             tournament: tournamentName
         }, {} as any, {} as any);
 
-        expect(result).toBe(true);
+        expect(result).toEqual({
+            isEligible: true
+        });
         expect(mock).toHaveReceivedCommandWith(QueryCommand, {
             TableName: process.env.TABLE_NAME,
             KeyConditionExpression: '#type = :type',
@@ -66,7 +68,9 @@ describe('handler', () => {
             tournamentDay
         }, {} as any, {} as any);
 
-        expect(result).toBe(true);
+        expect(result).toEqual({
+            isEligible: true
+        });
         expect(mock).toHaveReceivedCommandWith(QueryCommand, {
             TableName: process.env.TABLE_NAME,
             KeyConditionExpression: '#type = :type',
@@ -116,7 +120,9 @@ describe('handler', () => {
             tournamentDay
         }, {} as any, {} as any);
 
-        expect(result).toBe(true);
+        expect(result).toEqual({
+            isEligible: true
+        });
         expect(mock).toHaveReceivedCommandWith(QueryCommand, {
             TableName: process.env.TABLE_NAME,
             KeyConditionExpression: '#type = :type',
