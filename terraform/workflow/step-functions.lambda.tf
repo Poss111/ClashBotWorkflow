@@ -157,7 +157,7 @@ resource "aws_lambda_permission" "tournament_eligibility_permission" {
 resource "aws_lambda_permission" "create_team_permission" {
   statement_id  = "CreateTeamPermission-${lower(var.environment)}"
   action        = "lambda:InvokeFunction"
-  function_name = module.create_team_step_function.name
+  function_name = module.create_team_lambda.name
   principal     = "states.amazonaws.com"
   source_arn    = module.create_team_step_function.state_machine_arn
 }
