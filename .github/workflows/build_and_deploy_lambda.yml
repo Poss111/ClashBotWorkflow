@@ -65,9 +65,9 @@ jobs:
               uses: actions/cache@v2
               with:
                 path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
-                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
+                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/${{ inputs.artifact-name }}.zip') }}
                 restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/${{ inputs.artifact-name }}.zip') }}
+                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('**/${{ inputs.artifact-name }}.zip') }}
 
             - name: Test
               if: steps.cache.outputs.cache-hit != 'true'
