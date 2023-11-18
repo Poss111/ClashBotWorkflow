@@ -66,6 +66,12 @@ module "event_handler_lambda" {
   )
 }
 
+resource "aws_lambda_event_source_mapping" "event_handler_sqs_trigger" {
+  event_source_arn = module.clash_bot_event_sqs.queue_arn
+  function_name    = module.event_handler_lambda.name
+  batch_size       = 1
+}
+
 module "event_publisher_lambda" {
   source = "./modules/lambda"
 
