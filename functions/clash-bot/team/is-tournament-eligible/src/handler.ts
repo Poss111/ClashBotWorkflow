@@ -72,13 +72,17 @@ export const handler: Handler = async (event, context) => {
 
     const queryCommand = new QueryCommand(queryConditions);
 
+    logger.info("Sending query to DynamoDb...");
     const queryCommandOutput = await dynamoDBClient.send(queryCommand);
+    logger.info({ queryCommandOutput }, "Recieved query response from DynamoDb.");
 
     if (queryCommandOutput.Items === undefined || queryCommandOutput.Items.length === 0) {
+        logger.info("No tournaments found.");
         return {
             isEligible: false
         };
     } else {
+        logger.info({ tournaments: queryCommandOutput.Items }, "Tournaments found.");
         const currentDate = new Date();
         currentDate.setHours(0, 0, 0, 0); 
         const tournaments = queryCommandOutput.Items
@@ -90,6 +94,8 @@ export const handler: Handler = async (event, context) => {
                 logger.info({ ...tournament, tournamentIsEligible, currentDate }, 'Tournament eligibility...');
                 return tournamentIsEligible;
             });
+
+        logger.info({ tournaments }, 'Eligible tournaments found.');
 
         return {
             isEligible: tournaments.length > 0
