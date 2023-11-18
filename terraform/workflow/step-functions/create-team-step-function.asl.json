@@ -7,12 +7,12 @@
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": {
         "Payload": {
-          "tournamant": "$.Payload.tournament.tournamentName",
+          "tournamant": "$.tournament.tournamentName",
           "tournamentDay": "$.Payload.tournament.tournamentDay"
         },
         "FunctionName": "${IsTournamentEligibleLambdaFunctionArn}"
       },
-      "OutputPath": "$.Payload",
+      "ResultPath": "$.isTournamentEligible",
       "Next": "CanTeamBeCreated",
       "Catch": [
         {
@@ -25,7 +25,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.Payload",
+          "Variable": "$.isTournamentEligible",
           "BooleanEquals": false,
           "Next": "TournamentIsNotEligible"
         }
