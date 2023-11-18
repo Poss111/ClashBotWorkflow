@@ -66,7 +66,7 @@ jobs:
               id: generate-hash
               run: |
                 ls -lha
-                echo "::set-output name=hash::$(find ./${{ inputs.working-directory }}/src ./${{ inputs.working-directory }}/package.json -type f -exec sha256sum {} \; | sha256sum)"      
+                echo "::set-output name=hash::$(find src/* package.json -type f -exec sha256sum {} \; | sha256sum)"      
 
             - name: Cache lambda artifact
               id: cache
