@@ -13,6 +13,7 @@
         "FunctionName": "${IsTournamentEligibleLambdaFunctionArn}"
       },
       "ResultPath": "$.isTournamentEligible",
+      "OutputPath": "$.Payload",
       "Next": "CanTeamBeCreated",
       "Catch": [
         {
