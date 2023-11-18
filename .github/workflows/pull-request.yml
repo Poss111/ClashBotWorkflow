@@ -180,23 +180,23 @@ jobs:
 
       - name: Find latest Event Handler artifact
         id: eventHandlerArtifact
-        run: ../../scripts/find_latest_artifact.sh event-handler ${{ vars.S3_BUCKET_NAME }} development
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-handler development
 
       - name: Find latest Event Publisher artifact
         id: eventPublisherArtifact
-        run: ../../scripts/find_latest_artifact.sh event-publisher ${{ vars.S3_BUCKET_NAME }} development
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-publisher development
 
       - name: Find latest Create Team artifact
         id: createTeamArtifact
-        run: ../../scripts/find_latest_artifact.sh create-team ${{ vars.S3_BUCKET_NAME }} development
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} create-team development
 
       - name: Find latest Retrieve Teams artifact
         id: retrieveTeamsArtifact
-        run: ../../scripts/find_latest_artifact.sh retrieve-teams ${{ vars.S3_BUCKET_NAME }} development
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} retrieve-teams development
 
       - name: Find latest Is Tournament Eligible artifact
         id: isTournamentEligibleArtifact
-        run: ../../scripts/find_latest_artifact.sh is-tournament-eligible ${{ vars.S3_BUCKET_NAME }} development
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} is-tournament-eligible development
 
       - name: Latest Artifacts
         run: |
