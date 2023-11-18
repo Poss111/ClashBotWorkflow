@@ -62,14 +62,19 @@ jobs:
                 npm run build
                 zip -r ./lambda-artifact.zip ./prod ./package.json
 
+            - name: Generate hash
+              id: generate-hash
+              run: |
+                echo "::set-output name=hash::$(find ${{ inputs.working-directory }}/src ${{ inputs.working-directory }}/package.json -type f -exec sha256sum {} \; | sha256sum)"      
+
             - name: Cache lambda artifact
               id: cache
               uses: actions/cache@v2
               with:
                 path: ${{ inputs.working-directory}}/lambda-artifact.zip
-                key: ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/src/**,${{ inputs.working-directory }}/package.json') }}
+                key: ${{ inputs.artifact-name }}-lambda-${{ steps.generate-hash.outputs.hash }}
                 restore-keys: |
-                  ${{ inputs.artifact-name }}-lambda-${{ hashFiles('${{ inputs.working-directory }}/src/**,${{ inputs.working-directory }}/package.json') }}
+                  ${{ inputs.artifact-name }}-lambda-
 
             - name: Test
               if: steps.cache.outputs.cache-hit != 'true'
