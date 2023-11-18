@@ -95,7 +95,7 @@ export const handler: Handler = async (event, context) => {
                 return tournamentIsEligible;
             });
 
-        logger.info({ tournaments }, 'Eligible tournaments have been found.');
+        logger.info({ tournaments }, 'Eligible tournaments found.');
 
         return {
             isEligible: tournaments.length > 0
