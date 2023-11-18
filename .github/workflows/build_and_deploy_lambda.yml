@@ -58,12 +58,9 @@ jobs:
               run: npm install
 
             - name: Build Artifact
-              env:
-                HASH: ${{ hashFiles('**/lambda-artifact.zip') }}
               run: |
                 npm run build
                 zip -r ./lambda-artifact.zip ./prod ./package.json
-                echo "Calulated hash: $HASH"
 
             - name: Cache lambda artifact
               id: cache
