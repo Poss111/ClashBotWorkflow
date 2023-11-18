@@ -13,6 +13,13 @@ module "create_team_step_function" {
     dynamodb = {
       dynamodb = [module.dynamodb_table.dynamodb_table_arn]
     }
+    lambda = {
+      lambda = [
+        module.create_team_lambda.arn,
+        module.retrieve_team_lambda.arn,
+        module.tournament_eligibility_lambda.arn
+      ]
+    }
   }
 
   type = "STANDARD"
