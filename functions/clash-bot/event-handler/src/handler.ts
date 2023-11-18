@@ -17,7 +17,7 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         const sfArn = eventMap.get(parsedEvent.event);
 
         if (!sfArn) {
-            logger.error(`Unmapped event found event=${parsedEvent.event}`);
+            logger.error(`Unmapped event found event=${parsedEvent.event}!`);
             return null;
         }
 
