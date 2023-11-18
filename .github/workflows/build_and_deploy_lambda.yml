@@ -65,7 +65,7 @@ jobs:
             - name: Generate hash
               id: generate-hash
               run: |
-                ls -lha ./${{ inputs.working-directory }}
+                ls -lha
                 echo "::set-output name=hash::$(find ./${{ inputs.working-directory }}/src ./${{ inputs.working-directory }}/package.json -type f -exec sha256sum {} \; | sha256sum)"      
 
             - name: Cache lambda artifact
