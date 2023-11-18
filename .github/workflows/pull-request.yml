@@ -147,99 +147,99 @@ jobs:
     needs:
       - terraformPreReqs
 
-  terraformWorkflow:
-    name: Workflow Apply
-    runs-on: ubuntu-latest
-    environment: 
-      name: Development
-    defaults:
-      run:
-        working-directory: ./terraform/workflow
-    permissions:
-      id-token: write
-      contents: read
-      pull-requests: write
-    needs:
-      - eventHandler
-      - eventPublisher
-      - createTeam
-      - retrieveTeams
-      - isTournamentEligible
+  # terraformWorkflow:
+  #   name: Workflow Apply
+  #   runs-on: ubuntu-latest
+  #   environment: 
+  #     name: Development
+  #   defaults:
+  #     run:
+  #       working-directory: ./terraform/workflow
+  #   permissions:
+  #     id-token: write
+  #     contents: read
+  #     pull-requests: write
+  #   needs:
+  #     - eventHandler
+  #     - eventPublisher
+  #     - createTeam
+  #     - retrieveTeams
+  #     - isTournamentEligible
 
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
+  #   steps:
+  #     - uses: FranzDiebold/github-env-vars-action@v2.1.0
 
-      - name: Checkout
-        uses: actions/checkout@v3
+  #     - name: Checkout
+  #       uses: actions/checkout@v3
 
-      - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
-          aws-region: us-east-1
+  #     - name: Configure AWS Credentials
+  #       uses: aws-actions/configure-aws-credentials@v3
+  #       with:
+  #         role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
+  #         aws-region: us-east-1
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v1
-        with:
-          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+  #     - name: Setup Terraform
+  #       uses: hashicorp/setup-terraform@v1
+  #       with:
+  #         cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
 
-      - name: Terraform Format
-        id: fmt
-        run: terraform fmt -check
+  #     - name: Terraform Format
+  #       id: fmt
+  #       run: terraform fmt -check
 
-      - name: Terraform Init
-        id: init
-        run: terraform init -backend-config=backend-configs/${{ vars.ENVIRONMENT }}.remote.tfbackend
+  #     - name: Terraform Init
+  #       id: init
+  #       run: terraform init -backend-config=backend-configs/${{ vars.ENVIRONMENT }}.remote.tfbackend
 
-      - name: Terraform Validate
-        id: validate
-        run: terraform validate -no-color
+  #     - name: Terraform Validate
+  #       id: validate
+  #       run: terraform validate -no-color
 
-      - name: Apply
-        id: apply
-        env:
-          TF_VAR_region: us-east-1
-          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
-          TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
-          TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
-          TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
-          TF_VAR_create_team_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
-          TF_VAR_retrieve_teams_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/retrieve-teams.zip
-          TF_VAR_tournament_eligibility_lambda_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/is-tournament-eligible.zip
-          TF_VAR_sqs_batch_size: "1"
-        run: terraform apply -no-color -input=false --auto-approve
+  #     - name: Apply
+  #       id: apply
+  #       env:
+  #         TF_VAR_region: us-east-1
+  #         TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+  #         TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+  #         TF_VAR_event_publisher_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-publisher.zip
+  #         TF_VAR_event_handler_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/event-handler.zip
+  #         TF_VAR_create_team_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/create-team.zip
+  #         TF_VAR_retrieve_teams_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/retrieve-teams.zip
+  #         TF_VAR_tournament_eligibility_lambda_artifact_path: artifacts/${{ vars.ENVIRONMENT }}/${{ github.run_number }}/is-tournament-eligible.zip
+  #         TF_VAR_sqs_batch_size: "1"
+  #       run: terraform apply -no-color -input=false --auto-approve
 
-      - name: Update Pull Request
-        uses: actions/github-script@v6.1.0
-        if: github.event_name == 'pull_request'
-        env:
-          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const output = `Clash Bot Workflow - Apply
-            #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
-            #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Workflow Apply 📖\`${{ steps.apply.outcome }}\`
-            #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
+  #     - name: Update Pull Request
+  #       uses: actions/github-script@v6.1.0
+  #       if: github.event_name == 'pull_request'
+  #       env:
+  #         APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
+  #       with:
+  #         github-token: ${{ secrets.GITHUB_TOKEN }}
+  #         script: |
+  #           const output = `Clash Bot Workflow - Apply
+  #           #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
+  #           #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
+  #           #### Workflow Apply 📖\`${{ steps.apply.outcome }}\`
+  #           #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Run</summary>
+  #           <details><summary>Show Run</summary>
 
-            #### Workflow Apply
-            \`\`\`\n
-            ${process.env.APPLY}
-            \`\`\`
+  #           #### Workflow Apply
+  #           \`\`\`\n
+  #           ${process.env.APPLY}
+  #           \`\`\`
 
-            </details>
+  #           </details>
 
-            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+  #           *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
 
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: output
-            })
+  #           github.rest.issues.createComment({
+  #             issue_number: context.issue.number,
+  #             owner: context.repo.owner,
+  #             repo: context.repo.repo,
+  #             body: output
+  #           })
  
       # Commenting for now until I can cut down on graph size
       # - name: Install Graphviz
