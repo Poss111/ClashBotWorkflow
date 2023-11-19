@@ -25,7 +25,6 @@ module "events_table" {
 
   name           = "clash-bot-topics-${var.environment}"
   hash_key       = "topic"
-  range_key      = "subscriber"
   billing_mode   = "PROVISIONED"
   write_capacity = 5
   read_capacity  = 1
@@ -34,10 +33,6 @@ module "events_table" {
     {
       name = "topic"
       type = "S"
-    },
-    {
-      name = "subscriber"
-      type = "SS"
     }
   ]
 }
@@ -47,7 +42,6 @@ module "subscriber_table" {
 
   name           = "clash-bot-subscriber-${var.environment}"
   hash_key       = "subscriber"
-  range_key      = "topics"
   billing_mode   = "PROVISIONED"
   write_capacity = 5
   read_capacity  = 1
@@ -56,10 +50,6 @@ module "subscriber_table" {
     {
       name = "subscriber"
       type = "S"
-    },
-    {
-      name = "topics"
-      type = "SS"
     }
   ]
 }
