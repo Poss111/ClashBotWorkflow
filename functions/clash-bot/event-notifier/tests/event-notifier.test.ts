@@ -53,7 +53,7 @@ describe('Handle Websocket connection requests', () => {
         expect(client).toHaveReceivedCommandWith(DeleteItemCommand, expectedDeleteCommand);
     });
 
-    test('If a websocket message reqeust is recieved, it should post the details to DynamoDb to save the state.', async () => {
+    test('If a websocket message request is recieved, it should post the details to DynamoDb to save the state.', async () => {
         const event = createMockMessageEvent();
         const context = setupContext();
 
