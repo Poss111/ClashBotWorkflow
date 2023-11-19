@@ -62,13 +62,15 @@ module "event_notifier_lambda" {
   artifact_path = var.event_notifier_artifact_path
 
   environment_variables = {
-    TABLE_NAME = module.events_table.dynamodb_table_id
+    TOPIC_TO_SUBSCRIBER_TABLE_NAME = module.events_table.dynamodb_table_id,
+    SUBSCRIBER_TO_TOPIC_TABLE_NAME = module.subscriber_table.dynamodb_table_id
   }
 
   iam_policy_json = templatefile(
     "${path.module}/policies/event-notifier-lambda-policy.json",
     {
-      DYNAMODB_ARN = module.events_table.dynamodb_table_arn
+      DYNAMODB_ARN     = module.events_table.dynamodb_table_arn,
+      DYNAMODB_TWO_ARN = module.subscriber_table.dynamodb_table_arn,
     }
   )
 }

@@ -1,4 +1,5 @@
-import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, PutItemCommand, PutItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { unmarshall } from '@aws-sdk/util-dynamodb';
 import { APIGatewayProxyResultV2, APIGatewayProxyWebsocketEventV2, APIGatewayProxyWebsocketHandlerV2 } from 'aws-lambda';
 import pino from "pino";
 
@@ -19,44 +20,124 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
 
     if ('$connect' === routeKey) {
         logger.info("Received connect event...");
-        const persistItem: PutItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
-            Item: {
-                "connectionId": { S: connectionId },
-                "context": { S: "TBA" }
-            }
-        };
-        await client.send(new PutItemCommand(persistItem));
         return {
             statusCode: 200,
             body: JSON.stringify({ message: 'Connected' }),
         };
     } else if ('$disconnect' === routeKey) {
         logger.info("Received disconnect event...");
-        const deleteItem: DeleteItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
+        const getCommand: GetItemCommandInput = {
+            TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
             Key: {
-                "connectionId": { S: connectionId }
+                "subscriber": { S: event.requestContext.connectionId }
             }
         };
-        await client.send(new DeleteItemCommand(deleteItem));
-        return {
-            statusCode: 200,
-            body: JSON.stringify({ message: 'Disconnected' }),
-        };
-    } else if ('$message' === routeKey) {
+
+        const subscriberTopics = await client.send(new GetItemCommand(getCommand));
+
+        logger.info({ subscriberTopics }, "Subscriber topics.");
+
+        const subscriberToTopics = unmarshall(subscriberTopics.Item!);
+
+        if (subscriberToTopics.topics === undefined || subscriberToTopics.topics.length === 0) {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: 'Did not disconnect successfully' }),
+            };
+        } else {
+            logger.info({ subscriberToTopics }, "Subscriber to topics.", );
+
+            const deleteSubscriberToTopics: DeleteItemCommandInput = {
+                TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
+                Key: {
+                    "subscriber": { S: event.requestContext.connectionId }
+                }
+            };
+
+            const updateCommandPromises = [...subscriberToTopics.topics].map((topic: string) => {
+                return client.send(new UpdateItemCommand({
+                    TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
+                    Key: {
+                    "context": { S: topic }
+                    },
+                    ExpressionAttributeNames: {
+                    "#S": "subscribers"
+                    },
+                    ExpressionAttributeValues: {
+                    ":val": { SS: [event.requestContext.connectionId] }
+                    },
+                    UpdateExpression: "DELETE #S :val",
+                }));
+            });
+            try {
+                await Promise.all([
+                    ...updateCommandPromises,
+                    client.send(new DeleteItemCommand(deleteSubscriberToTopics))
+                ]);
+            } catch(error) {
+                logger.error({ error }, "Error deleting subscriber to topics.");
+                return {
+                    statusCode: 400,
+                    body: JSON.stringify({ message: 'Did not disconnect successfully' }),
+                };
+            }
+            return {
+                statusCode: 200,
+                body: JSON.stringify({ message: 'Disconnected' }),
+            };
+        }
+    } else if ('subscribe' === routeKey) {
         logger.info("Received message event...");
-        const persistItem: PutItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
-            Item: {
-                "connectionId": { S: connectionId },
-                "context": { S: "TBA" }
-            }
+        let topic = "";
+        if (event.body !== undefined) {
+            topic = JSON.parse(event.body).topic;
+        } else {
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: 'Missing topic' }),
+            };
+        }
+        const updateTopicToSubscribers: UpdateItemCommandInput = {
+            TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
+            Key: {
+                "topic": { S: topic },
+            },
+            ExpressionAttributeNames: {
+                "#S": "subscribers"
+            },
+            ExpressionAttributeValues: {
+                ":val": { SS: [event.requestContext.connectionId] }
+            },
+            UpdateExpression: "ADD #S :val"
         };
-        await client.send(new PutItemCommand(persistItem));
+        const updateSubscriberToTopics: UpdateItemCommandInput = {
+            TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
+            Key: {
+                "subscriber": { S: event.requestContext.connectionId },
+            },
+            ExpressionAttributeNames: {
+                "#S": "topics"
+            },
+            ExpressionAttributeValues: {
+                ":val": { SS: [topic] }
+            },
+            UpdateExpression: "ADD #S :val"
+        };
+        try {
+            await Promise.all([
+                client.send(new UpdateItemCommand(updateTopicToSubscribers)),
+                client.send(new UpdateItemCommand(updateSubscriberToTopics))
+            ]);
+        } catch(error) {
+            logger.error({ error }, "Error updating topic to subscribers.");
+            return {
+                statusCode: 400,
+                body: JSON.stringify({ message: 'Did not subscribe successfully' }),
+            };
+        }
         return {
             statusCode: 200,
-            body: JSON.stringify({ message: 'Message received' }),
+            body: JSON.stringify({ message: `Subcribed to '${topic}'` }),
         };
     }
 

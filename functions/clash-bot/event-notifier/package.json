@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@aws-sdk/util-dynamodb": "^3.451.0",
     "dotenv": "^16.3.1",
     "pino": "^8.15.0",
     "clash-bot-shared": "github:Poss111/ClashBotWorkflowShared#main"

@@ -23,21 +23,43 @@ module "dynamodb_table" {
 module "events_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name           = "clash-bot-events-${var.environment}"
-  hash_key       = "connectionId"
-  range_key      = "context"
+  name           = "clash-bot-topics-${var.environment}"
+  hash_key       = "topic"
+  range_key      = "subscriber"
   billing_mode   = "PROVISIONED"
   write_capacity = 5
   read_capacity  = 1
 
   attributes = [
     {
-      name = "connectionId"
+      name = "topic"
       type = "S"
     },
     {
-      name = "context"
+      name = "subscriber"
+      type = "SS"
+    }
+  ]
+}
+
+module "subscriber_table" {
+  source = "terraform-aws-modules/dynamodb-table/aws"
+
+  name           = "clash-bot-subscriber-${var.environment}"
+  hash_key       = "subscriber"
+  range_key      = "topics"
+  billing_mode   = "PROVISIONED"
+  write_capacity = 5
+  read_capacity  = 1
+
+  attributes = [
+    {
+      name = "subscriber"
       type = "S"
+    },
+    {
+      name = "topics"
+      type = "SS"
     }
   ]
 }

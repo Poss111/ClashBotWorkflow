@@ -20,7 +20,10 @@
                 "dynamodb:BatchGetItem"
             ],
             "Effect": "Allow",
-            "Resource": "${DYNAMODB_ARN}"
+            "Resource": [
+                "${DYNAMODB_ARN}",
+                "${DYNAMODB_TWO_ARN}"
+            ]
         }
     ],
     "Version": "2012-10-17"

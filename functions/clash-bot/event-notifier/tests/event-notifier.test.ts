@@ -1,6 +1,6 @@
 import { APIGatewayProxyEvent, APIGatewayProxyResult, APIGatewayProxyResultV2, APIGatewayProxyWebsocketEventV2 } from 'aws-lambda';
 import { handler } from '../src/handler';
-import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, PutItemCommand, PutItemCommandInput } from '@aws-sdk/client-dynamodb';
+import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 
@@ -10,71 +10,114 @@ describe('Handle Websocket connection requests', () => {
         const event = createMockConnectEvent();
         const context = setupContext();
 
-        const client = mockClient(DynamoDBClient);
-
-        client.on(PutItemCommand)
-            .resolves({});
-
-        const expectedPutCommand: PutItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
-            Item: {
-                "connectionId": { S: event.requestContext.connectionId },
-                "context": { S: "TBA" }
-            }
-        };
-        
         const result = await handler(event, context, () => { });
         expect(result).toBeDefined();
         expect((result as any).statusCode).toBe(200);
         expect((result as any).body).toBe('{\"message\":\"Connected\"}');
-        expect(client).toHaveReceivedCommandWith(PutItemCommand, expectedPutCommand);
     });
 
     test('If a websocket disconnect reqeust is recieved, it should post the details to DynamoDb to save the state.', async () => {
         const event = createMockDisconnectEvent();
         const context = setupContext();
+        const topic = "mockTopic";
 
         const client = mockClient(DynamoDBClient);
 
         client.on(DeleteItemCommand)
             .resolves({});
+        client.on(GetItemCommand)
+            .resolves({
+                Item: {
+                    "topics": {
+                        SS: [topic]
+                    }
+                }
+            });
+        client.on(UpdateItemCommand)
+            .resolves({});
 
-        const expectedDeleteCommand: DeleteItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
+        const getCommand: GetItemCommandInput = {
+            TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
             Key: {
-                "connectionId": { S: event.requestContext.connectionId }
+                "subscriber": { S: event.requestContext.connectionId }
             }
         };
+
+        const expectedDeleteCommandForSubscriberToTopic: DeleteItemCommandInput = {
+            TableName: process.env.TABLE_NAME,
+            Key: {
+                "subscriber": { S: event.requestContext.connectionId }
+            }
+        };
+
+        const expectedDeleteCommandForTopicToSubscriber: UpdateItemCommandInput = {
+            TableName: process.env.TABLE_NAME,
+            Key: {
+              "context": { S: topic }
+            },
+            ExpressionAttributeNames: {
+              "#S": "subscribers"
+            },
+            ExpressionAttributeValues: {
+              ":val": { SS: [event.requestContext.connectionId] }
+            },
+            UpdateExpression: "DELETE #S :val",
+        };
+        
 
         const result = await handler(event, context, () => { });
         expect(result).toBeDefined();
         expect((result as any).statusCode).toBe(200);
         expect((result as any).body).toBe('{\"message\":\"Disconnected\"}');
-        expect(client).toHaveReceivedCommandWith(DeleteItemCommand, expectedDeleteCommand);
+        expect(client).toHaveReceivedCommandWith(GetItemCommand, getCommand);
+        expect(client).toHaveReceivedCommandWith(UpdateItemCommand, expectedDeleteCommandForTopicToSubscriber);
+        expect(client).toHaveReceivedCommandWith(DeleteItemCommand, expectedDeleteCommandForSubscriberToTopic);
     });
 
-    test('If a websocket message request is recieved, it should post the details to DynamoDb to save the state.', async () => {
+    test('If a websocket subscribe request is recieved, it should post the details to DynamoDb to save the state.', async () => {
         const event = createMockMessageEvent();
         const context = setupContext();
+        const topic = JSON.parse(event.body ?? "{}").topic;
 
         const client = mockClient(DynamoDBClient);
 
-        client.on(PutItemCommand)
+        client.on(UpdateItemCommand)
             .resolves({});
 
-        const expectedPutCommand: PutItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
-            Item: {
-                "connectionId": { S: event.requestContext.connectionId },
-                "context": { S: "TBA" }
-            }
+        const expectedUpdateItemInput: UpdateItemCommandInput = {
+            TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
+            Key: {
+                "topic": { S: topic },
+            },
+            ExpressionAttributeNames: {
+                "#S": "subscribers"
+            },
+            ExpressionAttributeValues: {
+                ":val": { SS: [event.requestContext.connectionId] }
+            },
+            UpdateExpression: "ADD #S :val"
+        };
+
+        const expectedUpdateItemInputSubscriberToTopics: UpdateItemCommandInput = {
+            TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
+            Key: {
+                "subscriber": { S: event.requestContext.connectionId },
+            },
+            ExpressionAttributeNames: {
+                "#S": "topics"
+            },
+            ExpressionAttributeValues: {
+                ":val": { SS: [topic] }
+            },
+            UpdateExpression: "ADD #S :val"
         };
 
         const result = await handler(event, context, () => { });
         expect(result).toBeDefined();
         expect((result as any).statusCode).toBe(200);
-        expect((result as any).body).toBe('{\"message\":\"Message received\"}');
-        expect(client).toHaveReceivedCommandWith(PutItemCommand, expectedPutCommand);
+        expect((result as any).body).toBe(`{\"message\":\"Subcribed to '${topic}'\"}`);
+        expect(client).toHaveReceivedCommandWith(UpdateItemCommand, expectedUpdateItemInput);
+        expect(client).toHaveReceivedCommandWith(UpdateItemCommand, expectedUpdateItemInputSubscriberToTopics);
     });
 
 });
@@ -149,20 +192,21 @@ const createMockDisconnectEvent = (): APIGatewayProxyWebsocketEventV2 => {
 const createMockMessageEvent = (): APIGatewayProxyWebsocketEventV2 => {
     return {
         requestContext: {
-            apiId: 'sampleApiId',
-            domainName: 'sampleDomainName',
-            requestId: 'sampleRequestId',
-            routeKey: '$message',
-            stage: 'dev',
-            messageId: 'sampleMessageId',
-            eventType: 'CONNECT',
-            extendedRequestId: 'sampleExtendedRequestId',
-            requestTime: 'sampleRequestTime',
-            messageDirection: 'IN',
-            connectedAt: Date.now(),
-            requestTimeEpoch: Date.now(),
-            connectionId: 'sampleConnectionId'
+            routeKey: "subscribe", 
+            messageId: "OqOHdcL-oAMCKcw=", 
+            eventType: "MESSAGE", 
+            extendedRequestId: "OqOHdHnOoAMFozw=", 
+            requestTime: "19/Nov/2023:19:09:22 +0000", 
+            messageDirection: "IN", 
+            stage: "events-development", 
+            connectedAt: 1700420961168, 
+            requestTimeEpoch: 1700420962611, 
+            requestId: "OqOHdHnOoAMFozw=", 
+            domainName: "k10wm04op6.execute-api.us-east-1.amazonaws.com", 
+            connectionId: "OqOHOcLhIAMCKcw=", 
+            apiId: "k10wm04op6"
         },
+        body: "{\"action\":\"subscribe\",\"topic\":\"mocktopic\"}", 
         isBase64Encoded: false
     };
 };
