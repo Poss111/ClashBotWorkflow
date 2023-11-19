@@ -50,8 +50,8 @@ resource "aws_apigatewayv2_deployment" "clash_bot_websocket_api_deployment" {
 }
 
 resource "aws_apigatewayv2_stage" "clash_bot_websocket_api_stage" {
-  api_id        = aws_apigatewayv2_api.clash_bot_websocket_api.id
-  name          = "events-${var.environment}"
-  description   = "Clash Bot Workflow Websocket API stage"
-  auto_deploy   = true
+  api_id      = aws_apigatewayv2_api.clash_bot_websocket_api.id
+  name        = "events-${var.environment}"
+  description = "Clash Bot Workflow Websocket API stage"
+  auto_deploy = true
 }
