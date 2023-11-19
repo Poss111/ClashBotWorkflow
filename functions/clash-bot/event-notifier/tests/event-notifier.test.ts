@@ -44,16 +44,16 @@ describe('Handle Websocket connection requests', () => {
         };
 
         const expectedDeleteCommandForSubscriberToTopic: DeleteItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
+            TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
             Key: {
                 "subscriber": { S: event.requestContext.connectionId }
             }
         };
 
         const expectedDeleteCommandForTopicToSubscriber: UpdateItemCommandInput = {
-            TableName: process.env.TABLE_NAME,
+            TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
             Key: {
-              "context": { S: topic }
+              "topic": { S: topic }
             },
             ExpressionAttributeNames: {
               "#S": "subscribers"

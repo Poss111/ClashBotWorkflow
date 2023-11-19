@@ -58,7 +58,7 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
                 return client.send(new UpdateItemCommand({
                     TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
                     Key: {
-                    "context": { S: topic }
+                    "topic": { S: topic }
                     },
                     ExpressionAttributeNames: {
                     "#S": "subscribers"
