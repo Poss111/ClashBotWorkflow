@@ -3,8 +3,14 @@ import { handler } from '../src/handler';
 import { DeleteItemCommand, DeleteItemCommandInput, DynamoDBClient, GetItemCommand, GetItemCommandInput, PutItemCommand, PutItemCommandInput, UpdateItemCommand, UpdateItemCommandInput } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
+import { before } from 'node:test';
 
 describe('Handle Websocket connection requests', () => {
+
+    beforeEach(() => {
+        process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME = "mockTopicToSubscriberTableName";
+        process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME = "mockSubscriberToTopicTableName";
+    });
 
     test('If a websocket connection reqeust is recieved, it should post the details to DynamoDb to save the state.', async () => {
         const event = createMockConnectEvent();

@@ -45,10 +45,10 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
                 body: JSON.stringify({ message: 'Did not disconnect successfully' }),
             };
         } else {
-            logger.info({ subscriberToTopics }, "Subscriber to topics.", );
+            logger.info({ subscriberToTopics }, "Subscriber to topics.",);
 
             const deleteSubscriberToTopics: DeleteItemCommandInput = {
-                TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
+                TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
                 Key: {
                     "subscriber": { S: event.requestContext.connectionId }
                 }
@@ -56,15 +56,15 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
 
             const updateCommandPromises = [...subscriberToTopics.topics].map((topic: string) => {
                 return client.send(new UpdateItemCommand({
-                    TableName: process.env.SUBSCRIBER_TO_TOPIC_TABLE_NAME,
+                    TableName: process.env.TOPIC_TO_SUBSCRIBER_TABLE_NAME,
                     Key: {
-                    "topic": { S: topic }
+                        "topic": { S: topic }
                     },
                     ExpressionAttributeNames: {
-                    "#S": "subscribers"
+                        "#S": "subscribers"
                     },
                     ExpressionAttributeValues: {
-                    ":val": { SS: [event.requestContext.connectionId] }
+                        ":val": { SS: [event.requestContext.connectionId] }
                     },
                     UpdateExpression: "DELETE #S :val",
                 }));
@@ -74,7 +74,7 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
                     ...updateCommandPromises,
                     client.send(new DeleteItemCommand(deleteSubscriberToTopics))
                 ]);
-            } catch(error) {
+            } catch (error) {
                 logger.error({ error }, "Error deleting subscriber to topics.");
                 return {
                     statusCode: 400,
@@ -128,7 +128,7 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (event: APIGatew
                 client.send(new UpdateItemCommand(updateTopicToSubscribers)),
                 client.send(new UpdateItemCommand(updateSubscriberToTopics))
             ]);
-        } catch(error) {
+        } catch (error) {
             logger.error({ error }, "Error updating topic to subscribers.");
             return {
                 statusCode: 400,
