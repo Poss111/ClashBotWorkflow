@@ -114,6 +114,17 @@ jobs:
     needs:
       - terraformPreReqs
 
+  eventNotifier:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/event-notifier
+      artifact-name: event-notifier
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
   createTeam:
     uses: ./.github/workflows/build_and_deploy_lambda.yml
     with:
@@ -162,6 +173,7 @@ jobs:
     needs:
       - eventHandler
       - eventPublisher
+      - eventNotifier
       - createTeam
       - retrieveTeams
       - isTournamentEligible
@@ -198,6 +210,10 @@ jobs:
         id: isTournamentEligibleArtifact
         run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} is-tournament-eligible development
 
+      - name: Find latest Event Notifier artifact
+        id: eventNotifierArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-notifier development
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -223,6 +239,7 @@ jobs:
           TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
           TF_VAR_event_publisher_artifact_path: ${{ steps.eventPublisherArtifact.outputs.artifact-path }}
           TF_VAR_event_handler_artifact_path: ${{ steps.eventHandlerArtifact.outputs.artifact-path }}
+          TF_VAR_event_notifier_artifact_path: ${{ steps.eventNotifierArtifact.outputs.artifact-path }}
           TF_VAR_create_team_artifact_path: ${{ steps.createTeamArtifact.outputs.artifact-path }}
           TF_VAR_retrieve_teams_artifact_path: ${{ steps.retrieveTeamsArtifact.outputs.artifact-path }}
           TF_VAR_tournament_eligibility_lambda_artifact_path: ${{ steps.isTournamentEligibleArtifact.outputs.artifact-path }}
@@ -245,6 +262,7 @@ jobs:
             | --------------- | ---------------- |
             | Event Publisher | ${{ steps.eventPublisherArtifact.outputs.version }} |
             | Event Handler | ${{ steps.eventHandlerArtifact.outputs.version }} |
+            | Event Notifier | ${{ steps.eventNotifierArtifact.outputs.version }} |
             | Create Team | ${{ steps.createTeamArtifact.outputs.version }} |
             | Retrieve Teams | ${{ steps.retrieveTeamsArtifact.outputs.version }} |
             | Is Tournament Eligible | ${{ steps.isTournamentEligibleArtifact.outputs.version }} |

@@ -25,6 +25,11 @@ variable "event_handler_artifact_path" {
   description = "Path to the artifact for the event handler lambda function."
 }
 
+variable "event_notifier_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the event notifier lambda function."
+}
+
 variable "create_team_artifact_path" {
   type        = string
   description = "Path to the artifact for the create team lambda function."

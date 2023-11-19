@@ -28,8 +28,8 @@
 			"path": "../../event-handler"
 		},
 		{
-			"name": "prod",
-			"path": "../../event-publisher/prod"
+			"name": "event-notifier",
+			"path": "../../event-notifier"
 		}
 	],
 	"settings": {
