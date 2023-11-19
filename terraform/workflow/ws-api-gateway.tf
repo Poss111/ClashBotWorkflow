@@ -27,3 +27,20 @@ resource "aws_lambda_permission" "clash_bot_ws_lambda_permission" {
 
   source_arn = "${aws_apigatewayv2_api.clash_bot_websocket_api.execution_arn}/*/*"
 }
+
+resource "aws_apigatewayv2_deployment" "clash_bot_websocket_api_deployment" {
+  api_id      = aws_apigatewayv2_api.clash_bot_websocket_api.id
+  description = "Webscocket API deployment"
+
+  depends_on = [
+    aws_apigatewayv2_route.clash_bot_connection_route
+  ]
+}
+
+resource "aws_apigatewayv2_stage" "clash_bot_websocket_api_stage" {
+  api_id        = aws_apigatewayv2_api.clash_bot_websocket_api.id
+  name          = "events-${var.environment}"
+  description   = "Clash Bot Workflow Websocket API stage"
+  deployment_id = aws_apigatewayv2_deployment.clash_bot_websocket_api_deployment.id
+  auto_deploy   = true
+}
