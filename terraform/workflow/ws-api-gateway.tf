@@ -10,6 +10,18 @@ resource "aws_apigatewayv2_route" "clash_bot_connection_route" {
   target    = "integrations/${aws_apigatewayv2_integration.clash_bot_websocket_api_integration.id}"
 }
 
+resource "aws_apigatewayv2_route" "clash_bot_disconnection_route" {
+  api_id    = aws_apigatewayv2_api.clash_bot_websocket_api.id
+  route_key = "$disconnect"
+  target    = "integrations/${aws_apigatewayv2_integration.clash_bot_websocket_api_integration.id}"
+}
+
+resource "aws_apigatewayv2_route" "clash_bot_message_route" {
+  api_id    = aws_apigatewayv2_api.clash_bot_websocket_api.id
+  route_key = "$message"
+  target    = "integrations/${aws_apigatewayv2_integration.clash_bot_websocket_api_integration.id}"
+}
+
 resource "aws_apigatewayv2_integration" "clash_bot_websocket_api_integration" {
   api_id           = aws_apigatewayv2_api.clash_bot_websocket_api.id
   integration_type = "AWS_PROXY"
