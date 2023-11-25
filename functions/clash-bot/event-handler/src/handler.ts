@@ -26,7 +26,10 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
         return client.send(new StartExecutionCommand({
             stateMachineArn: sfArn,
             name: `${parsedEvent.event}-${record.messageId}`,
-            input: JSON.stringify(parsedEvent.payload),
+            input: JSON.stringify({
+                requestId: parsedEvent.uuid,
+                payload: parsedEvent.payload
+            }),
             traceHeader: record.messageId
         }));
     });

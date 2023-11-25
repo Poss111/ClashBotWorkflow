@@ -7,8 +7,8 @@
       "Resource": "arn:aws:states:::lambda:invoke",
       "Parameters": {
         "Payload": {
-          "tournamant.$": "$.tournament.tournamentName",
-          "tournamentDay.$": "$.tournament.tournamentDay"
+          "tournamant.$": "$.payload.tournament.tournamentName",
+          "tournamentDay.$": "$.payload.tournament.tournamentDay"
         },
         "FunctionName": "${IsTournamentEligibleLambdaFunctionArn}"
       },
@@ -35,13 +35,16 @@
     },
     "TournamentIsNotEligible": {
       "Type": "Pass",
-      "Result": "Tournamnet is not eligible for team creation.",
-      "End": true
+      "Result": {
+        "$.requestId": "$.requestId",
+        "$.messageToPublish": "Tournamnet is not eligible for team creation."
+      },
+      "Next": "PublishEvent"
     },
     "CreateTeam": {
       "Type": "Task",
       "Resource": "arn:aws:states:::lambda:invoke",
-      "OutputPath": "$.Payload",
+      "OutputPath": "$.messageToPublish",
       "Parameters": {
         "Payload.$": "$",
         "FunctionName": "${CreateTeamLambdaFunctionArn}"
@@ -52,11 +55,26 @@
           "Next": "DefaultErrorHandler"
         }
       ],
-      "End": true
+      "Next": "PublishEvent"
     },
     "DefaultErrorHandler": {
       "Type": "Pass",
-      "Result": "An error occurred",
+      "Result": {
+        "$.requestId": "$.requestId",
+        "$.messageToPublish": "An error occurred"
+      },
+      "Next": "PublishEvent"
+    },
+    "PublishEvent": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload": {
+          "requestId.$": "$.requestId",
+          "payload.$": "$.messageToPublish"
+        },
+        "FunctionName": "${WebSocketPublishLambdaFunctionArn}"
+      },
       "End": true
     }
   }

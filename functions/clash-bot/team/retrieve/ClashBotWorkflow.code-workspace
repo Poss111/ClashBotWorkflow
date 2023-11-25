@@ -30,12 +30,15 @@
 		{
 			"name": "event-notifier",
 			"path": "../../event-notifier"
+		},
+		{
+			"name": "websocket-publisher",
+			"path": "../../websocket-publisher"
 		}
 	],
 	"settings": {
 		"jest.disabledWorkspaceFolders": [
-			"can-create-team",
-			"prod"
+			"can-create-team"
 		]
 	}
 }

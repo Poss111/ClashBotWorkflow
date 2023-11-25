@@ -1,0 +1,36 @@
+{
+  "name": "clash-bot-{{ name|to_kebab_case }}",
+  "version": "1.0.0",
+  "description": "A auto generated lambda for Clash Bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "build": "tsc",
+    "postbuild": "cp package.json prod/package.json && cd prod && npm install --omit=dev"
+  },
+  "keywords": [
+    "clash-bot"
+  ],
+  "author": "Poss111",
+  "license": "ISC",
+  "devDependencies": {
+    "@aws-sdk/types": "^3.398.0",
+    "@types/aws-lambda": "^8.10.119",
+    "@types/jest": "^29.5.4",
+    "@types/pino": "^7.0.5",
+    "aws-sdk-client-mock": "^3.0.0",
+    "aws-sdk-client-mock-jest": "^3.0.0",
+    "jest": "^29.6.4",
+    "pino-pretty": "^10.2.0",
+    "ts-jest": "^29.1.1",
+    "ts-mockito": "^2.6.1",
+    "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.398.0",
+    "@aws-sdk/util-dynamodb": "^3.451.0",
+    "dotenv": "^16.3.1",
+    "pino": "^8.15.0",
+    "clash-bot-shared": "github:Poss111/ClashBotWorkflowShared#main"
+  }
+}

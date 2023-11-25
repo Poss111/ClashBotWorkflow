@@ -5,7 +5,8 @@ module "create_team_step_function" {
   definition = templatefile("${path.module}/step-functions/create-team-step-function.asl.json", {
     CreateTeamLambdaFunctionArn           = module.create_team_lambda.arn,
     RetrieveTeamLambdaFunctionArn         = module.retrieve_team_lambda.arn,
-    IsTournamentEligibleLambdaFunctionArn = module.tournament_eligibility_lambda.arn
+    IsTournamentEligibleLambdaFunctionArn = module.tournament_eligibility_lambda.arn,
+    WebSocketPublishLambdaFunctionArn     = module.websocket_publisher_lambda.arn
     }
   )
 
@@ -88,6 +89,28 @@ module "tournament_eligibility_lambda" {
   )
 }
 
+module "websocket_publisher_lambda" {
+  source = "./modules/lambda"
+
+  prefix         = "websocket-publisher"
+  s3_bucket_name = var.s3_bucket_name
+  environment    = var.environment
+
+  artifact_path = var.websocket_publisher_artifact_path
+
+  environment_variables = {
+    TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_arn,
+    WEBSOCKET_API_ENDPOINT          = aws_apigatewayv2_api.clash_bot_websocket_api.api_endpoint
+  }
+
+  iam_policy_json = templatefile(
+    "${path.module}/policies/websocket-publisher-lambda-policy.json",
+    {
+      DYNAMODB_ARN = module.events_table.dynamodb_table_arn
+    }
+  )
+}
+
 resource "aws_lambda_permission" "apigw" {
   statement_id  = "AllowExecutionFromAPIGateway-${lower(var.environment)}"
   action        = "lambda:InvokeFunction"
@@ -111,6 +134,14 @@ resource "aws_lambda_permission" "create_team_permission" {
   statement_id  = "CreateTeamPermission-${lower(var.environment)}"
   action        = "lambda:InvokeFunction"
   function_name = module.create_team_lambda.name
+  principal     = "states.amazonaws.com"
+  source_arn    = module.create_team_step_function.state_machine_arn
+}
+
+resource "aws_lambda_permission" "websocket_publisher_permission" {
+  statement_id  = "WebSocketPublisherPermission-${lower(var.environment)}"
+  action        = "lambda:InvokeFunction"
+  function_name = module.websocket_publisher_lambda.name
   principal     = "states.amazonaws.com"
   source_arn    = module.create_team_step_function.state_machine_arn
 }
