@@ -158,6 +158,17 @@ jobs:
     needs:
       - terraformPreReqs
 
+  websocketPublisher:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/websocket-publisher
+      artifact-name: websocket-publisher
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
   terraformWorkflow:
     name: Workflow Apply
     runs-on: ubuntu-latest
@@ -177,6 +188,7 @@ jobs:
       - createTeam
       - retrieveTeams
       - isTournamentEligible
+      - websocketPublisher
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -214,6 +226,10 @@ jobs:
         id: eventNotifierArtifact
         run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-notifier development
 
+      - name: Find latest Websocket Publisher artifact
+        id: webSocketPublisherArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} websocket-publisher development
+
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
         with:
@@ -243,6 +259,7 @@ jobs:
           TF_VAR_create_team_artifact_path: ${{ steps.createTeamArtifact.outputs.artifact-path }}
           TF_VAR_retrieve_teams_artifact_path: ${{ steps.retrieveTeamsArtifact.outputs.artifact-path }}
           TF_VAR_tournament_eligibility_lambda_artifact_path: ${{ steps.isTournamentEligibleArtifact.outputs.artifact-path }}
+          TF_VAR_websocket_publisher_artifact_path: ${{ steps.webSocketPublisherArtifact.outputs.artifact-path }}
           TF_VAR_sqs_batch_size: "1"
         run: terraform apply -no-color -input=false --auto-approve
 
@@ -258,14 +275,15 @@ jobs:
 
             ## Lambda Function Versions used
 
-            | Lambda Function | Artifact Version |
-            | --------------- | ---------------- |
-            | Event Publisher | ${{ steps.eventPublisherArtifact.outputs.version }} |
-            | Event Handler | ${{ steps.eventHandlerArtifact.outputs.version }} |
-            | Event Notifier | ${{ steps.eventNotifierArtifact.outputs.version }} |
-            | Create Team | ${{ steps.createTeamArtifact.outputs.version }} |
-            | Retrieve Teams | ${{ steps.retrieveTeamsArtifact.outputs.version }} |
-            | Is Tournament Eligible | ${{ steps.isTournamentEligibleArtifact.outputs.version }} |
+            | Lambda Function | Type | Artifact Version |
+            | --------------- | ---- | ---------------- |
+            | Event Publisher | Foundation | ${{ steps.eventPublisherArtifact.outputs.version }} |
+            | Event Handler | Foundation | ${{ steps.eventHandlerArtifact.outputs.version }} |
+            | Event Notifier | Foundation | ${{ steps.eventNotifierArtifact.outputs.version }} |
+            | Websocket Publisher | Foundation | ${{ steps.webSocketPublisherArtifact.outputs.version }} |
+            | Create Team | Team | ${{ steps.createTeamArtifact.outputs.version }} |
+            | Retrieve Teams | Team | ${{ steps.retrieveTeamsArtifact.outputs.version }} |
+            | Is Tournament Eligible | Team | ${{ steps.isTournamentEligibleArtifact.outputs.version }} |
 
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
