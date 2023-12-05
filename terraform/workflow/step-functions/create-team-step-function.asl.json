@@ -12,12 +12,13 @@
         },
         "FunctionName": "${IsTournamentEligibleLambdaFunctionArn}"
       },
-      "ResultPath": "$.isTournamentEligible",
-      "OutputPath": "$.isEligible",
+      "ResultPath": "$.output",
       "Next": "CanTeamBeCreated",
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "DefaultErrorHandler"
         }
       ]
@@ -26,7 +27,7 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.isTournamentEligible",
+          "Variable": "$.output.Payload.isEligible",
           "BooleanEquals": false,
           "Next": "TournamentIsNotEligible"
         }
@@ -35,11 +36,11 @@
     },
     "TournamentIsNotEligible": {
       "Type": "Pass",
-      "Result": {
-        "$.requestId": "$.requestId",
-        "$.messageToPublish": "Tournamnet is not eligible for team creation."
-      },
-      "Next": "PublishEvent"
+      "Next": "PublishEvent",
+      "Parameters": {
+        "requestId.$": "$.requestId",
+        "messageToPublish": "Tournament is not eligible for team creation."
+      }
     },
     "CreateTeam": {
       "Type": "Task",
@@ -51,7 +52,9 @@
       },
       "Catch": [
         {
-          "ErrorEquals": ["States.ALL"],
+          "ErrorEquals": [
+            "States.ALL"
+          ],
           "Next": "DefaultErrorHandler"
         }
       ],
