@@ -2,7 +2,7 @@ import { Handler } from 'aws-lambda';
 import pino from "pino";
 
 import { ApiGatewayManagementApiClient, PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
-import { WebsocketEvent } from 'clash-bot-shared';
+import { SUBSCRIPTION_TYPE, WebsocketEvent } from 'clash-bot-shared';
 import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
 
@@ -23,17 +23,26 @@ export const handler: Handler = async (event: WebsocketEvent) => {
         logger.info({ topic }, 'Retrieving subscriptions to topic...');
 
         const dynamoDbClient = new DynamoDBClient({});
-        const results = await dynamoDbClient.send(new GetItemCommand({
+
+        const topics = [topic, SUBSCRIPTION_TYPE.WATCH_ALL];
+        logger.info({ topics }, 'Retrieving subscriptions to topics...')
+        const getTopicCommands = topics.map((topic) => new GetItemCommand({
             TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
             Key: {
                 "topic": { S: topic }
             }
         }));
 
-        let subscribers: string[] = [];
+        const results = await Promise.all(getTopicCommands.map((command) => dynamoDbClient.send(command)));
 
-        if (results.Item) {
-            subscribers = [...unmarshall(results.Item).subscribers];
+        const subscribers: string[] = [];
+
+        if (results.length > 0) {
+            for (const getItemOutput of results) {
+                if (getItemOutput.Item !== undefined) {
+                    subscribers.push(...unmarshall(getItemOutput.Item).subscribers);
+                }
+            }
         } else {
             logger.info({ topic }, 'No subscribers found...');
         }
@@ -41,7 +50,7 @@ export const handler: Handler = async (event: WebsocketEvent) => {
         logger.info({ subscribers }, 'Subscribers found...');
         logger.info({ event }, 'Sending payload...');
 
-        const posts = subscribers.map((subscriber) => {
+        const responses = await Promise.all(subscribers.map((subscriber) => {
             const requestParams = {
                 ConnectionId: subscriber,
                 Data: JSON.stringify(event.payload),
@@ -49,9 +58,7 @@ export const handler: Handler = async (event: WebsocketEvent) => {
             const client = new ApiGatewayManagementApiClient({ endpoint: process.env.WEBSOCKET_API_ENDPOINT })
 
             return client.send(new PostToConnectionCommand(requestParams));
-        });
-
-        const responses = await Promise.all(posts);
+        }));
 
         return {
             posts: responses,
