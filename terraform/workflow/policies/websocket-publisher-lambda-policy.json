@@ -24,7 +24,8 @@
         },
         {
             "Action": [
-                "execute-api:Invoke"
+                "execute-api:Invoke",
+                "execute-api:ManageConnections"
             ],
             "Effect": "Allow",
             "Resource": "${WS_GATEWAY_ARN}/POST/@connections/*"
