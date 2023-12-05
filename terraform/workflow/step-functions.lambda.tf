@@ -18,7 +18,8 @@ module "create_team_step_function" {
       lambda = [
         module.create_team_lambda.arn,
         module.retrieve_team_lambda.arn,
-        module.tournament_eligibility_lambda.arn
+        module.tournament_eligibility_lambda.arn,
+        module.websocket_publisher_lambda.arn
       ]
     }
   }
