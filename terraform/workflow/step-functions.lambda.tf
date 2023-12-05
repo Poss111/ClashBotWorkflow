@@ -101,13 +101,14 @@ module "websocket_publisher_lambda" {
 
   environment_variables = {
     TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_id,
-    WEBSOCKET_API_ENDPOINT          = "https://${aws_apigatewayv2_api.clash_bot_websocket_api.id}.execute-api.${var.region}.amazonaws.com/${aws_apigatewayv2_stage.clash_bot_websocket_api_stage.name}/@connections"
+    WEBSOCKET_API_ENDPOINT          = "https://${aws_apigatewayv2_api.clash_bot_websocket_api.id}.execute-api.${var.region}.amazonaws.com/${aws_apigatewayv2_stage.clash_bot_websocket_api_stage.name}"
   }
 
   iam_policy_json = templatefile(
     "${path.module}/policies/websocket-publisher-lambda-policy.json",
     {
-      DYNAMODB_ARN = module.events_table.dynamodb_table_arn
+      DYNAMODB_ARN   = module.events_table.dynamodb_table_arn,
+      WS_GATEWAY_ARN = aws_apigatewayv2_api.clash_bot_websocket_api.arn
     }
   )
 }

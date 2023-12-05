@@ -21,6 +21,13 @@
             ],
             "Effect": "Allow",
             "Resource": "${DYNAMODB_ARN}"
+        },
+        {
+            "Action": [
+                "execute-api:Invoke"
+            ],
+            "Effect": "Allow",
+            "Resource": "${WS_GATEWAY_ARN}/POST/@connections/*"
         }
     ],
     "Version": "2012-10-17"
