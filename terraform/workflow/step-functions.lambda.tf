@@ -100,7 +100,7 @@ module "websocket_publisher_lambda" {
   artifact_path = var.websocket_publisher_artifact_path
 
   environment_variables = {
-    TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_arn,
+    TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_id,
     WEBSOCKET_API_ENDPOINT          = aws_apigatewayv2_api.clash_bot_websocket_api.api_endpoint
   }
 
