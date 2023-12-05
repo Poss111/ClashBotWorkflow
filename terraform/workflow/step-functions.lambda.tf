@@ -108,7 +108,7 @@ module "websocket_publisher_lambda" {
     "${path.module}/policies/websocket-publisher-lambda-policy.json",
     {
       DYNAMODB_ARN   = module.events_table.dynamodb_table_arn,
-      WS_GATEWAY_ARN = aws_apigatewayv2_api.clash_bot_websocket_api.arn
+      WS_GATEWAY_ARN = aws_apigatewayv2_stage.clash_bot_websocket_api_stage.execution_arn
     }
   )
 }
