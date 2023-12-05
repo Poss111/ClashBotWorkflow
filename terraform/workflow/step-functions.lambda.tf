@@ -101,7 +101,7 @@ module "websocket_publisher_lambda" {
 
   environment_variables = {
     TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_id,
-    WEBSOCKET_API_ENDPOINT          = aws_apigatewayv2_api.clash_bot_websocket_api.api_endpoint
+    WEBSOCKET_API_ENDPOINT          = "https://${aws_apigatewayv2_api.clash_bot_websocket_api.id}.execute-api.${var.region}.amazonaws.com/${aws_apigatewayv2_stage.clash_bot_websocket_api_stage.name}/@connections"
   }
 
   iam_policy_json = templatefile(
