@@ -15,6 +15,16 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
     try {
         const sqsClient = new SQSClient({});
         const mappedEventType = eventMap.get(event.requestContext.path);
+        if (!event.body || !JSON.parse(event.body).uuid) {
+            logger.error(`Missing uuid in body for request url=${event.requestContext.path}...`);
+            return {
+                statusCode: 400,
+                body: JSON.stringify({
+                    error: "Missing request id."
+                })
+            };
+        }
+        const requestIdFromUser = JSON.parse(event.body).uuid;
         if (!mappedEventType) {
             logger.error(`Unmapped event found url=${event.requestContext.path}`);
             return {
@@ -28,7 +38,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         logger.info(`Event Type for url => ${mappedEventType}...`)
         const eventToBeSent: EventPayload = { 
             payload: JSON.parse(event.body!),
-            uuid: event.requestContext.requestId,
+            uuid: requestIdFromUser,
             event: mappedEventType,
             url: event.requestContext.path,
         };
@@ -36,7 +46,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
             QueueUrl: process.env.QUEUE_URL,
             MessageBody: JSON.stringify(eventToBeSent),
             MessageGroupId: 'event',
-            MessageDeduplicationId: event.requestContext.requestId
+            MessageDeduplicationId: requestIdFromUser
         };
         const message = new SendMessageCommand(input);
         const response = await sqsClient
@@ -45,7 +55,7 @@ export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEven
         return {
             statusCode: 200,
             body: JSON.stringify({
-                requestId: event.requestContext.requestId
+                requestId: requestIdFromUser
             })
         };
     } catch (error) {

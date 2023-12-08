@@ -2,6 +2,7 @@ import { Handler } from 'aws-lambda';
 import pino from "pino";
 import { DynamoDBClient, QueryCommand, QueryCommandInput } from '@aws-sdk/client-dynamodb';
 import { unmarshall } from '@aws-sdk/util-dynamodb';
+import { TABLE_TYPES } from 'clash-bot-shared';
 
 export const handler: Handler = async (event, context) => {
     const level = process.env.LOGGER_LEVEL === undefined ? "info" : process.env.LOGGER_LEVEL;
@@ -27,7 +28,7 @@ export const handler: Handler = async (event, context) => {
         },
         ExpressionAttributeValues: {
             ":type": {
-                S: "Tournament"
+                S: TABLE_TYPES.TOURNAMENT
             },
         }
     };

@@ -1,0 +1,30 @@
+[
+    {
+        "id": 135101,
+        "themeI d": 4,
+        "nameKey": "aram2022",
+        "nameKeySecondary": "day_4",
+        "schedule": [
+            {
+                "id": 127581,
+                "registrationTime": 1702253700000,
+                "startTime": 1702263600000,
+                "cancelled": false
+            }
+        ]
+    },
+    {
+        "id": 135081,
+        "themeId": 4,
+        "nameKey": "aram2022",
+        "nameKeySecondary": "day_3",
+        "schedule": [
+            {
+                "id": 127561,
+                "registrationTime": 1702167300000,
+                "startTime": 1702177200000,
+                "cancelled": false
+            }
+        ]
+    }
+]

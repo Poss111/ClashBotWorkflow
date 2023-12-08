@@ -3,6 +3,7 @@ import { DynamoDBClient, QueryCommand } from '@aws-sdk/client-dynamodb';
 import { mockClient } from 'aws-sdk-client-mock';
 import 'aws-sdk-client-mock-jest';
 import { marshall } from '@aws-sdk/util-dynamodb';
+import { TABLE_TYPES } from 'clash-bot-shared';
 
 describe('handler', () => {
     test('If the tournament is after the current date, then respond with true', async () => {
@@ -14,7 +15,7 @@ describe('handler', () => {
         mockQueryCommand.mockResolvedValue({
             Items: [
                 marshall({
-                    type: 'Tournament',
+                    type: TABLE_TYPES.TOURNAMENT,
                     tournament: tournamentName,
                     date: date.toISOString()
                 })
@@ -38,7 +39,7 @@ describe('handler', () => {
                 '#tournament': 'tournament'
             },
             ExpressionAttributeValues: {
-                ':type': { S: 'Tournament' },
+                ':type': { S: TABLE_TYPES.TOURNAMENT, },
                 ':tournament': { S: tournamentName }
             }
         });
@@ -54,7 +55,7 @@ describe('handler', () => {
         mockQueryCommand.mockResolvedValue({
             Items: [
                 marshall({
-                    type: 'Tournament',
+                    type: TABLE_TYPES.TOURNAMENT,
                     tournament: tournamentName,
                     tournamentDay,
                     date: date.toISOString()
@@ -81,7 +82,7 @@ describe('handler', () => {
                 '#tournamentDay': 'tournamentDay'
             },
             ExpressionAttributeValues: {
-                ':type': { S: 'Tournament' },
+                ':type': { S: TABLE_TYPES.TOURNAMENT },
                 ':tournament': { S: tournamentName },
                 ':tournamentDay': { S: tournamentDay }
             }
@@ -100,13 +101,13 @@ describe('handler', () => {
         mockQueryCommand.mockResolvedValue({
             Items: [
                 marshall({
-                    type: 'Tournament',
+                    type: TABLE_TYPES.TOURNAMENT,
                     tournament: tournamentName,
                     tournamentDay,
                     date: priorDate.toISOString()
                 }),
                 marshall({
-                    type: 'Tournament',
+                    type: TABLE_TYPES.TOURNAMENT,
                     tournament: tournamentName,
                     tournamentDay: '2',
                     date: date.toISOString()
@@ -133,7 +134,7 @@ describe('handler', () => {
                 '#tournamentDay': 'tournamentDay'
             },
             ExpressionAttributeValues: {
-                ':type': { S: 'Tournament' },
+                ':type': { S: TABLE_TYPES.TOURNAMENT },
                 ':tournament': { S: tournamentName },
                 ':tournamentDay': { S: tournamentDay }
             }
