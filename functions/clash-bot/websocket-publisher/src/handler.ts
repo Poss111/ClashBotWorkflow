@@ -39,12 +39,17 @@ export const handler: Handler = async (event: WebsocketEvent) => {
 
         if (results.length > 0) {
             for (const getItemOutput of results) {
-                if (getItemOutput.Item !== undefined) {
+                if (getItemOutput.Item !== undefined && getItemOutput.Item.subscribers !== undefined) {
                     subscribers.push(...unmarshall(getItemOutput.Item).subscribers);
                 }
             }
         } else {
             logger.info({ topic }, 'No subscribers found...');
+            return {
+                posts: [],
+                topic,
+                payload: event.payload
+            }
         }
 
         logger.info({ subscribers }, 'Subscribers found...');

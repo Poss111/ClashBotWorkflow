@@ -129,7 +129,11 @@ describe('Websocket Publisher', () => {
             .resolves({});
 
         const result = await handler(event as WebsocketEvent, context as Context, () => { });
-        expect(result).toBeDefined();
+        expect(result).toEqual({
+            posts: [],
+            topic: topicKey,
+            payload: event.payload
+        });
         expect(dynamoClientMock).toHaveReceivedCommandWith(GetItemCommand, {
             TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
             Key: {
@@ -137,6 +141,66 @@ describe('Websocket Publisher', () => {
             }
         });
         expect(apiGatewayMock).not.toHaveReceivedCommand(PostToConnectionCommand);
+    });
+
+    test('No topics subscribers for WATCH_ALL', async () => {
+        const topicKey = 'topic';
+        const connectionIdForAll = '1234';
+        const event = {
+            requestId: topicKey,
+            payload: {
+                message: 'message'
+            }
+        };
+        const context = {};
+
+        const dynamoClientMock = mockClient(DynamoDBClient);
+        const apiGatewayMock = mockClient(ApiGatewayManagementApiClient);
+
+        dynamoClientMock.on(GetItemCommand, {
+            TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
+            Key: {
+                "topic": { S: SUBSCRIPTION_TYPE.WATCH_ALL }
+            }
+        }).resolves({
+                Item: {}
+            });
+
+        dynamoClientMock.on(GetItemCommand, {
+            TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
+            Key: {
+                "topic": { S: topicKey }
+            }
+        }).resolves({
+                Item: {
+                    topic: {
+                        S: topicKey
+                    },
+                    subscribers: {
+                        SS: [
+                            connectionIdForAll
+                        ]
+                    }
+                }
+            });
+        apiGatewayMock.on(PostToConnectionCommand)
+            .resolves({});
+
+        const result = await handler(event as WebsocketEvent, context as Context, () => { });
+        expect(result).toBeDefined();
+        expect(dynamoClientMock).toHaveReceivedCommandWith(GetItemCommand, {
+            TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
+            Key: {
+                "topic": { S: topicKey }
+            }
+        });
+        expect(dynamoClientMock).toHaveReceivedCommandWith(GetItemCommand, {
+            TableName: process.env.TOPIC_TO_SUBSCRIBERS_TABLE_NAME,
+            Key: {
+                "topic": { S: SUBSCRIPTION_TYPE.WATCH_ALL }
+            }
+        });
+        expect(apiGatewayMock).toHaveReceivedCommand(PostToConnectionCommand);
     });
 
     test('Error Case - Missing requestId', async () => {
