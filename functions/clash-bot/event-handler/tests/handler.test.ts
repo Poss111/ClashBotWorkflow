@@ -83,7 +83,10 @@ describe('Should invoke a AWS Step function based on the event.', () => {
             await expect(sfnMock).toHaveReceivedCommandWith(StartExecutionCommand, {
                 stateMachineArn: eventEntry.arn,
                 name: `${eventEntry.event}-${sqsEvent.Records[0].messageId}`,
-                input: JSON.stringify(event.payload),
+                input: JSON.stringify({
+                    requestId: event.uuid,
+                    payload: event.payload
+                }),
                 traceHeader: sqsEvent.Records[0].messageId
             });
         });
@@ -149,13 +152,19 @@ describe('Should invoke a AWS Step function based on the event.', () => {
             await expect(sfnMock).toHaveReceivedCommandWith(StartExecutionCommand, {
                 stateMachineArn: 'arn:aws:states:us-east-1:123456789012:stateMachine:HelloWorld-StateMachine',
                 name: `${createTeamEvent.event}-${sqsEvent.Records[0].messageId}`,
-                input: JSON.stringify(createTeamEvent.payload),
+                input: JSON.stringify({
+                    requestId: createTeamEvent.uuid,
+                    payload: createTeamEvent.payload
+                }),
                 traceHeader: sqsEvent.Records[0].messageId
             });
             await expect(sfnMock).toHaveReceivedCommandWith(StartExecutionCommand, {
                 stateMachineArn: 'arn:aws:states:us-east-1:123456789012:stateMachine:HelloWorld-StateMachine-2',
                 name: `${updateTeamEvent.event}-${sqsEvent.Records[1].messageId}`,
-                input: JSON.stringify(updateTeamEvent.payload),
+                input: JSON.stringify({
+                    requestId: updateTeamEvent.uuid,
+                    payload: updateTeamEvent.payload
+                }),
                 traceHeader: sqsEvent.Records[1].messageId
             });
         });

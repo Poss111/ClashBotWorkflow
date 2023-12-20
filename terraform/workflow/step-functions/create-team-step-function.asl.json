@@ -1,0 +1,84 @@
+{
+  "Comment": "Creates a Clash Bot team for a Discord Service if the user is able to.",
+  "StartAt": "CheckIfTournamentIsEligible",
+  "States": {
+    "CheckIfTournamentIsEligible": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload": {
+          "tournamant.$": "$.payload.tournament.tournamentName",
+          "tournamentDay.$": "$.payload.tournament.tournamentDay"
+        },
+        "FunctionName": "${IsTournamentEligibleLambdaFunctionArn}"
+      },
+      "ResultPath": "$.output",
+      "Next": "CanTeamBeCreated",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "DefaultErrorHandler"
+        }
+      ]
+    },
+    "CanTeamBeCreated": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.output.Payload.isEligible",
+          "BooleanEquals": false,
+          "Next": "TournamentIsNotEligible"
+        }
+      ],
+      "Default": "CreateTeam"
+    },
+    "TournamentIsNotEligible": {
+      "Type": "Pass",
+      "Next": "PublishEvent",
+      "Parameters": {
+        "requestId.$": "$.requestId",
+        "messageToPublish": "Tournament is not eligible for team creation."
+      }
+    },
+    "CreateTeam": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "OutputPath": "$.messageToPublish",
+      "Parameters": {
+        "Payload.$": "$",
+        "FunctionName": "${CreateTeamLambdaFunctionArn}"
+      },
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "DefaultErrorHandler"
+        }
+      ],
+      "Next": "PublishEvent"
+    },
+    "DefaultErrorHandler": {
+      "Type": "Pass",
+      "Result": {
+        "$.requestId": "$.requestId",
+        "$.messageToPublish": "An error occurred"
+      },
+      "Next": "PublishEvent"
+    },
+    "PublishEvent": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "Payload": {
+          "requestId.$": "$.requestId",
+          "payload.$": "$.messageToPublish"
+        },
+        "FunctionName": "${WebSocketPublishLambdaFunctionArn}"
+      },
+      "End": true
+    }
+  }
+}

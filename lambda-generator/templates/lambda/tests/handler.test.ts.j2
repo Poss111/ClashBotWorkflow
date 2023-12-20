@@ -1,0 +1,24 @@
+import { handler } from '../src/handler';
+import { mockClient } from 'aws-sdk-client-mock';
+import 'aws-sdk-client-mock-jest';
+import { before } from 'node:test';
+
+describe('Placeholder', () => {
+
+    test('Happy Path', async () => {
+        const event = {};
+        const context = {};
+
+        const result = await handler(event as any, context as any, () => { });
+        expect(result).toBeDefined();
+    });
+
+    test('Error Case', async () => {
+        const event = {};
+        const context = {};
+
+        const result = await handler(event as any, context as any, () => { });
+        expect(result).toBeDefined();
+    });
+
+});

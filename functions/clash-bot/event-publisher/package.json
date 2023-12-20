@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "jest",
-    "build": "tsc"
+    "build": "tsc",
+    "postbuild": "cp package.json prod/package.json && cd prod && npm install --omit=dev"
   },
   "keywords": [
     "clash-bot"

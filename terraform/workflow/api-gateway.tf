@@ -1,33 +1,3 @@
-provider "aws" {
-  region = var.region
-
-  default_tags {
-    tags = {
-      Application = "ClashBot"
-      Environment = var.environment
-    }
-  }
-}
-
-terraform {
-  backend "remote" {
-    organization = "ClashBot"
-
-    workspaces {
-      name = "ClashBotWorkflow"
-    }
-  }
-}
-
-data "aws_acm_certificate" "issued" {
-  domain   = "clash-bot.ninja"
-  statuses = ["ISSUED"]
-}
-
-resource "aws_cloudwatch_log_group" "api_gateway_default_log_group" {
-  name = "api_gateway_default_log_group"
-}
-
 module "api_gateway" {
   source = "terraform-aws-modules/apigateway-v2/aws"
 
@@ -51,31 +21,23 @@ module "api_gateway" {
 
   # Routes and integrations
   integrations = {
-    "$default" = {
-      lambda_arn       = aws_lambda_function.event_publisher_lambda.arn,
-      integration_type = "AWS_PROXY"
+    "POST /api/v2/teams" = {
+      lambda_arn       = module.event_publisher_lambda.arn,
+      integration_type = "AWS_PROXY",
     }
+  }
+
+  default_route_settings = {
+    throttling_burst_limit = 5
+    throttling_rate_limit  = 5.0
   }
 }
 
-module "dynamodb_table" {
-  source = "terraform-aws-modules/dynamodb-table/aws"
+data "aws_acm_certificate" "issued" {
+  domain   = "clash-bot.ninja"
+  statuses = ["ISSUED"]
+}
 
-  name           = "clash-bot-workflow-${var.environment}"
-  hash_key       = "type"
-  range_key      = "id"
-  billing_mode   = "PROVISIONED"
-  write_capacity = 5
-  read_capacity  = 1
-
-  attributes = [
-    {
-      name = "type"
-      type = "S"
-    },
-    {
-      name = "id"
-      type = "S"
-    }
-  ]
+resource "aws_cloudwatch_log_group" "api_gateway_default_log_group" {
+  name = "api_gateway_default_log_group-${var.environment}"
 }

@@ -9,87 +9,11 @@ on:
       - '**/.gitignore'
 
 jobs:
-  eventPublisher:
-    name: Event Publisher Lambda
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-publisher
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Install depedencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Archive
-        run: |
-          tar -czf ./event-publisher-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-          ls -lha
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-publisher-${{ github.run_number }}
-          path: ./functions/clash-bot/event-publisher/event-publisher-${{ github.run_number }}.tar.gz
-          if-no-files-found: error
-
-  eventHandler:
-    name: Event Handler Lambda
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./functions/clash-bot/event-handler
-    
-    steps:
-      - uses: FranzDiebold/github-env-vars-action@v2.1.0
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: '16'
-      
-      - name: Checkout
-        uses: actions/checkout@v2
-      
-      - name: Install dependencies
-        run: npm install
-
-      - name: Test
-        run: npm test
-
-      - name: Build
-        run: npm run build
-
-      - name: Archive
-        run: |
-          tar -czf ./event-handler-${{ github.run_number }}.tar.gz ./prod ./node_modules ./package.json
-          ls -lha
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: event-handler-${{ github.run_number }}
-          path: ./functions/clash-bot/event-handler/event-handler-${{ github.run_number }}.tar.gz
-          if-no-files-found: error
-
   terraformPreReqs:
-    name: 'Terraform Plan Prereqs'
+    name: Prerequisites Apply
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/prereqs
@@ -127,34 +51,34 @@ jobs:
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
+      - name: Apply
+        id: apply
         if: github.event_name == 'pull_request'
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: development
-          TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
-        run: terraform plan -no-color -input=false
+          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+        run: terraform apply -no-color -input=false
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `Clash Bot Workflow Prerequisites - plan
+            const output = `Clash Bot Workflow Prerequisites - Apply
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Prerequisite Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Prerequisite Apply 📖\`${{ steps.apply.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+            <details><summary>Show Apply</summary>
 
             #### Prerequisites
             \`\`\`\n
-            ${process.env.PLAN}
+            ${process.env.APPLY}
             \`\`\`
 
             </details>
@@ -168,20 +92,103 @@ jobs:
               body: output
             })
 
+  eventPublisher:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/event-publisher
+      artifact-name: event-publisher
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  eventHandler:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/event-handler
+      artifact-name: event-handler
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  eventNotifier:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/event-notifier
+      artifact-name: event-notifier
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  createTeam:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/team/create
+      artifact-name: create-team
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  retrieveTeams:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/team/retrieve
+      artifact-name: retrieve-teams
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  isTournamentEligible:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/team/is-tournament-eligible
+      artifact-name: is-tournament-eligible
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
+  websocketPublisher:
+    uses: ./.github/workflows/build_and_deploy_lambda.yml
+    with:
+      working-directory: functions/clash-bot/websocket-publisher
+      artifact-name: websocket-publisher
+      s3-bucket-name: ${{ vars.S3_BUCKET_NAME }}
+      environment-name: Development
+      region: us-east-1
+    needs:
+      - terraformPreReqs
+
   terraformWorkflow:
-    name: 'Terraform Plan Workflow'
+    name: Workflow Apply
     runs-on: ubuntu-latest
+    environment: 
+      name: Development
     defaults:
       run:
         working-directory: ./terraform/workflow
-    needs: 
-      - terraformPreReqs
-      - eventPublisher
-      - eventHandler
     permissions:
       id-token: write
       contents: read
       pull-requests: write
+    needs:
+      - eventHandler
+      - eventPublisher
+      - eventNotifier
+      - createTeam
+      - retrieveTeams
+      - isTournamentEligible
+      - websocketPublisher
 
     steps:
       - uses: FranzDiebold/github-env-vars-action@v2.1.0
@@ -189,23 +196,39 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Extract Event Publisher Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: event-publisher-${{ github.run_number }}
-          path: ./terraform/prereqs
-
-      - name: Extract Event Handler Artifact
-        uses: actions/download-artifact@v2
-        with:
-          name: event-handler-${{ github.run_number }}
-          path: ./terraform/prereqs
-
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v3
         with:
           role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
           aws-region: us-east-1
+
+      - name: Find latest Event Handler artifact
+        id: eventHandlerArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-handler development
+
+      - name: Find latest Event Publisher artifact
+        id: eventPublisherArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-publisher development
+
+      - name: Find latest Create Team artifact
+        id: createTeamArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} create-team development
+
+      - name: Find latest Retrieve Teams artifact
+        id: retrieveTeamsArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} retrieve-teams development
+
+      - name: Find latest Is Tournament Eligible artifact
+        id: isTournamentEligibleArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} is-tournament-eligible development
+
+      - name: Find latest Event Notifier artifact
+        id: eventNotifierArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} event-notifier development
+
+      - name: Find latest Websocket Publisher artifact
+        id: webSocketPublisherArtifact
+        run: ../../scripts/find_latest_artifact.sh ${{ vars.S3_BUCKET_NAME }} websocket-publisher development
 
       - name: Setup Terraform
         uses: hashicorp/setup-terraform@v1
@@ -218,43 +241,60 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -backend-config=backend-configs/${{ vars.ENVIRONMENT }}.remote.tfbackend
 
       - name: Terraform Validate
         id: validate
         run: terraform validate -no-color
 
-      - name: Terraform Plan
-        id: plan
-        if: github.event_name == 'pull_request'
+      - name: Apply
+        id: apply
         env:
           TF_VAR_region: us-east-1
-          TF_VAR_environment: development
-          TF_VAR_s3_bucket_name: ${{ env.S3_BUCKET_NAME }}
-          TF_VAR_event_publisher_artifact_path: event-publisher-${{ github.run_number }}.tar.gz
-          TF_VAR_event_handler_artifact_path: event-handler-${{ github.run_number }}.tar.gz
+          TF_VAR_environment: ${{ vars.ENVIRONMENT }}
+          TF_VAR_s3_bucket_name: ${{ vars.S3_BUCKET_NAME }}
+          TF_VAR_event_publisher_artifact_path: ${{ steps.eventPublisherArtifact.outputs.artifact-path }}
+          TF_VAR_event_handler_artifact_path: ${{ steps.eventHandlerArtifact.outputs.artifact-path }}
+          TF_VAR_event_notifier_artifact_path: ${{ steps.eventNotifierArtifact.outputs.artifact-path }}
+          TF_VAR_create_team_artifact_path: ${{ steps.createTeamArtifact.outputs.artifact-path }}
+          TF_VAR_retrieve_teams_artifact_path: ${{ steps.retrieveTeamsArtifact.outputs.artifact-path }}
+          TF_VAR_tournament_eligibility_lambda_artifact_path: ${{ steps.isTournamentEligibleArtifact.outputs.artifact-path }}
+          TF_VAR_websocket_publisher_artifact_path: ${{ steps.webSocketPublisherArtifact.outputs.artifact-path }}
           TF_VAR_sqs_batch_size: "1"
-        run: terraform plan -no-color -input=false
+        run: terraform apply -no-color -input=false --auto-approve
 
       - name: Update Pull Request
         uses: actions/github-script@v6.1.0
         if: github.event_name == 'pull_request'
         env:
-          PLAN: "terraform\n${{ steps.plan.outputs.stdout }}"
+          APPLY: "terraform\n${{ steps.apply.outputs.stdout }}"
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const output = `Clash Bot Workflow - plan
+            const output = `# Clash Bot Workflow PR Details
+
+            ## Lambda Function Versions used
+
+            | Lambda Function | Type | Artifact Version |
+            | --------------- | ---- | ---------------- |
+            | Event Publisher | Foundation | ${{ steps.eventPublisherArtifact.outputs.version }} |
+            | Event Handler | Foundation | ${{ steps.eventHandlerArtifact.outputs.version }} |
+            | Event Notifier | Foundation | ${{ steps.eventNotifierArtifact.outputs.version }} |
+            | Websocket Publisher | Foundation | ${{ steps.webSocketPublisherArtifact.outputs.version }} |
+            | Create Team | Team | ${{ steps.createTeamArtifact.outputs.version }} |
+            | Retrieve Teams | Team | ${{ steps.retrieveTeamsArtifact.outputs.version }} |
+            | Is Tournament Eligible | Team | ${{ steps.isTournamentEligibleArtifact.outputs.version }} |
+
             #### Terraform Format and Style 🖌\`${{ steps.fmt.outcome }}\`
             #### Terraform Initialization ⚙️\`${{ steps.init.outcome }}\`
-            #### Terraform Workflow Plan 📖\`${{ steps.plan.outcome }}\`
+            #### Workflow Apply 📖\`${{ steps.apply.outcome }}\`
             #### Terraform Validation 🤖\`${{ steps.validate.outcome }}\`
 
-            <details><summary>Show Plan</summary>
+            <details><summary>Show Run</summary>
 
-            #### Prerequisites
+            #### Workflow Apply
             \`\`\`\n
-            ${process.env.PLAN}
+            ${process.env.APPLY}
             \`\`\`
 
             </details>

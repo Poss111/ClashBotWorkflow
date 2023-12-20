@@ -1,0 +1,27 @@
+import { APIGatewayProxyEvent, APIGatewayProxyHandler } from 'aws-lambda';
+import pino from "pino";
+
+import { APIGatewayProxyResult } from 'aws-lambda';
+
+export const handler: APIGatewayProxyHandler = async (event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> => {
+    const level = process.env.LOGGER_LEVEL === undefined ? "info" : process.env.LOGGER_LEVEL;
+    const logger = pino({ level });
+    logger.info({ eventRecieved: event }, 'Recieved event...');
+    try {
+        return {
+            statusCode: 200,
+            body: JSON.stringify({
+                requestId: ""
+            })
+        };
+    } catch (error) {
+        logger.error(error, "Failed.");
+        return {
+            statusCode: 500,
+            body: JSON.stringify({
+                requestId: event.requestContext.requestId,
+                error: "Failed"
+            })
+        };
+    }
+};

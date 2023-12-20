@@ -25,6 +25,31 @@ variable "event_handler_artifact_path" {
   description = "Path to the artifact for the event handler lambda function."
 }
 
+variable "event_notifier_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the event notifier lambda function."
+}
+
+variable "create_team_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the create team lambda function."
+}
+
+variable "retrieve_teams_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the retrieve team lambda function."
+}
+
+variable "tournament_eligibility_lambda_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the tournament eligibility lambda function."
+}
+
+variable "websocket_publisher_artifact_path" {
+  type        = string
+  description = "Path to the artifact for the websocket publisher lambda function."
+}
+
 variable "sqs_batch_size" {
   type        = number
   default     = 1

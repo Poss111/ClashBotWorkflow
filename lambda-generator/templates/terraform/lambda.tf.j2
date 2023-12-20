@@ -1,0 +1,19 @@
+module "tournament_eligibility_lambda" {
+  source = "./modules/lambda"
+
+  prefix         = "{{ name }}"
+  s3_bucket_name = var.s3_bucket_name
+  environment    = var.environment
+
+  artifact_path = var.{{ name }}_artifact_path
+
+  environment_variables = {      
+    {% for item in items %}
+      {{ item }} = "placeholder"
+    {% endfor %}
+  }
+
+  iam_policy_json = templatefile(
+    "${path.module}/policies/{{ name }}-lambda-policy.json",
+  )
+}
