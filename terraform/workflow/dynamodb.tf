@@ -4,7 +4,7 @@ module "dynamodb_table" {
   name           = "clash-bot-workflow-${var.environment}"
   hash_key       = "type"
   range_key      = "id"
-  billing_mode   = "PROVISIONED"
+  billing_mode   = "PAY_PER_REQUEST"
   write_capacity = 5
   read_capacity  = 1
 
@@ -25,7 +25,7 @@ module "events_table" {
 
   name           = "clash-bot-topics-${var.environment}"
   hash_key       = "topic"
-  billing_mode   = "PROVISIONED"
+  billing_mode   = "PAY_PER_REQUEST"
   write_capacity = 5
   read_capacity  = 1
 
@@ -42,7 +42,7 @@ module "subscriber_table" {
 
   name           = "clash-bot-subscriber-${var.environment}"
   hash_key       = "subscriber"
-  billing_mode   = "PROVISIONED"
+  billing_mode   = "PAY_PER_REQUEST"
   write_capacity = 5
   read_capacity  = 1
 
