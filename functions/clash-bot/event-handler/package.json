@@ -6,7 +6,7 @@
   "scripts": {
     "test": "jest",
     "build": "tsc",
-    "postbuild": "cp package.json prod/package.json && cd prod && npm install --omit=dev"
+    "postbuild": "cp package.json prod/package.json"
   },
   "keywords": [
     "clash-bot",

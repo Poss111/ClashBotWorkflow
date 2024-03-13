@@ -30,3 +30,11 @@ module "lambda_bucket" {
   }
   POLICY
 }
+
+resource "aws_lambda_layer_version" "lambda_layer" {
+  s3_bucket  = module.lambda_bucket.s3_bucket_id
+  s3_key     = "layers/lambda_layer.zip"
+  layer_name = "clash-bot-workflow-layer"
+
+  compatible_runtimes = ["nodejs16.x"]
+}

@@ -23,6 +23,8 @@ export const handler: SQSHandler = async (event: SQSEvent) => {
 
         logger.info(`Setting up payload to trigger SFN ${sfArn}...`);
 
+        logger.info(`Triggering SFN ${sfArn}...`)
+
         return client.send(new StartExecutionCommand({
             stateMachineArn: sfArn,
             name: `${parsedEvent.event}-${record.messageId}`,

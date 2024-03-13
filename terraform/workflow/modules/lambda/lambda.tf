@@ -7,6 +7,10 @@ resource "aws_lambda_function" "lambda" {
   s3_bucket = var.s3_bucket_name
   s3_key    = var.artifact_path
 
+  layers = [
+    var.lambda_layer_arn
+  ]
+
   environment {
     variables = var.environment_variables
   }
