@@ -5,7 +5,7 @@ module "event_handler_lambda" {
   s3_bucket_name = var.s3_bucket_name
   environment    = var.environment
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = data.aws_lambda_layer_version.lambda_layer.arn
 
   artifact_path = var.event_handler_artifact_path
 
@@ -40,7 +40,7 @@ module "event_publisher_lambda" {
   s3_bucket_name = var.s3_bucket_name
   environment    = var.environment
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = data.aws_lambda_layer_version.lambda_layer.arn
 
   artifact_path = var.event_publisher_artifact_path
 
@@ -63,7 +63,7 @@ module "event_notifier_lambda" {
   s3_bucket_name = var.s3_bucket_name
   environment    = var.environment
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = data.aws_lambda_layer_version.lambda_layer.arn
 
   artifact_path = var.event_notifier_artifact_path
 
