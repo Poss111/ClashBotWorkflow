@@ -5,8 +5,6 @@ module "dynamodb_table" {
   hash_key       = "type"
   range_key      = "id"
   billing_mode   = "PAY_PER_REQUEST"
-  write_capacity = 5
-  read_capacity  = 1
 
   attributes = [
     {
@@ -26,8 +24,6 @@ module "events_table" {
   name           = "clash-bot-topics-${var.environment}"
   hash_key       = "topic"
   billing_mode   = "PAY_PER_REQUEST"
-  write_capacity = 5
-  read_capacity  = 1
 
   attributes = [
     {
@@ -43,8 +39,6 @@ module "subscriber_table" {
   name           = "clash-bot-subscriber-${var.environment}"
   hash_key       = "subscriber"
   billing_mode   = "PAY_PER_REQUEST"
-  write_capacity = 5
-  read_capacity  = 1
 
   attributes = [
     {
