@@ -1,10 +1,10 @@
 module "dynamodb_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name           = "clash-bot-workflow-${var.environment}"
-  hash_key       = "type"
-  range_key      = "id"
-  billing_mode   = "PAY_PER_REQUEST"
+  name         = "clash-bot-workflow-${var.environment}"
+  hash_key     = "type"
+  range_key    = "id"
+  billing_mode = "PAY_PER_REQUEST"
 
   attributes = [
     {
@@ -21,9 +21,9 @@ module "dynamodb_table" {
 module "events_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name           = "clash-bot-topics-${var.environment}"
-  hash_key       = "topic"
-  billing_mode   = "PAY_PER_REQUEST"
+  name         = "clash-bot-topics-${var.environment}"
+  hash_key     = "topic"
+  billing_mode = "PAY_PER_REQUEST"
 
   attributes = [
     {
@@ -36,9 +36,9 @@ module "events_table" {
 module "subscriber_table" {
   source = "terraform-aws-modules/dynamodb-table/aws"
 
-  name           = "clash-bot-subscriber-${var.environment}"
-  hash_key       = "subscriber"
-  billing_mode   = "PAY_PER_REQUEST"
+  name         = "clash-bot-subscriber-${var.environment}"
+  hash_key     = "subscriber"
+  billing_mode = "PAY_PER_REQUEST"
 
   attributes = [
     {
