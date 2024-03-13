@@ -1,4 +1,4 @@
-data "aws_aws_lambda_layer_version" "lambda_layer" {
+data "aws_lambda_layer_version" "lambda_layer" {
   layer_name = "clash-bot-workflow-layer"
 }
 
