@@ -40,7 +40,7 @@ module "create_team_lambda" {
 
   artifact_path = var.create_team_artifact_path
 
-  lambda_layer_arn = "data.aws_lambda_layer_version.lambda_layer.arn"
+  lambda_layer_arn = data.aws_lambda_layer_version.lambda_layer.arn
 
   environment_variables = {
     TABLE_NAME = module.dynamodb_table.dynamodb_table_id
