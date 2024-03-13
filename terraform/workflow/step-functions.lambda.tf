@@ -1,4 +1,4 @@
-data "lambda_layer_version" "lambda_layer" {
+data "aws_lambda_layer_version" "lambda_layer" {
   layer_name = "clash-bot-workflow-layer"
 }
 
@@ -40,7 +40,7 @@ module "create_team_lambda" {
 
   artifact_path = var.create_team_artifact_path
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = "data.lambda_layer_version.lambda_layer.arn"
 
   environment_variables = {
     TABLE_NAME = module.dynamodb_table.dynamodb_table_id
@@ -63,7 +63,7 @@ module "retrieve_team_lambda" {
 
   artifact_path = var.retrieve_teams_artifact_path
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = "data.lambda_layer_version.lambda_layer.arn"
 
   environment_variables = {
     TABLE_NAME = module.dynamodb_table.dynamodb_table_id
@@ -86,7 +86,7 @@ module "tournament_eligibility_lambda" {
 
   artifact_path = var.tournament_eligibility_lambda_artifact_path
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = "data.lambda_layer_version.lambda_layer.arn"
 
   environment_variables = {
     TABLE_NAME = module.dynamodb_table.dynamodb_table_id
@@ -109,7 +109,7 @@ module "websocket_publisher_lambda" {
 
   artifact_path = var.websocket_publisher_artifact_path
 
-  lambda_layer_arn = data.lambda_layer_version.lambda_layer.arn
+  lambda_layer_arn = "data.lambda_layer_version.lambda_layer.arn"
 
   environment_variables = {
     TOPIC_TO_SUBSCRIBERS_TABLE_NAME = module.events_table.dynamodb_table_id,
