@@ -1,0 +1,28 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "sqs:ReceiveMessage",
+                "sqs:GetQueueAttributes",
+                "sqs:DeleteMessage"
+            ],
+            "Effect": "Allow",
+            "Resource": "${SQS_ARN}"
+        },
+        {
+            "Action": "states:StartExecution",
+            "Effect": "Allow",
+            "Resource": "${CREATE_TEAM_STATE_MACHINE_ARN}"
+        }
+    ],
+    "Version": "2012-10-17"
+}

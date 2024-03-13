@@ -1,0 +1,30 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": [
+                "${DYNAMODB_ARN}",
+                "${DYNAMODB_TWO_ARN}"
+            ]
+        }
+    ],
+    "Version": "2012-10-17"
+}

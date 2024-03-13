@@ -1,0 +1,19 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": "sqs:SendMessage",
+            "Effect": "Allow",
+            "Resource": "${SQS_ARN}"
+        }
+    ],
+    "Version": "2012-10-17"
+}

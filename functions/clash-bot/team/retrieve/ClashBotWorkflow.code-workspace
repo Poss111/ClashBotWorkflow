@@ -1,0 +1,44 @@
+{
+	"folders": [
+		{
+			"path": "../../../.."
+		},
+		{
+			"name": "clash-bot-shared",
+			"path": "../../clash-bot-shared"
+		},
+		{
+			"name": "event-publisher",
+			"path": "../../event-publisher"
+		},
+		{
+			"name": "create",
+			"path": "../create"
+		},
+		{
+			"name": "retrieve",
+			"path": "."
+		},
+		{
+			"name": "can-create-team",
+			"path": "../can-create-team"
+		},
+		{
+			"name": "event-handler",
+			"path": "../../event-handler"
+		},
+		{
+			"name": "event-notifier",
+			"path": "../../event-notifier"
+		},
+		{
+			"name": "websocket-publisher",
+			"path": "../../websocket-publisher"
+		}
+	],
+	"settings": {
+		"jest.disabledWorkspaceFolders": [
+			"can-create-team"
+		]
+	}
+}

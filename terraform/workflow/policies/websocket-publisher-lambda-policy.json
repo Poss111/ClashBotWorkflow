@@ -1,0 +1,35 @@
+{
+    "Statement": [
+        {
+            "Action": [
+                "logs:PutLogEvents",
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup"
+            ],
+            "Effect": "Allow",
+            "Resource": "*"
+        },
+        {
+            "Action": [
+                "dynamodb:UpdateItem",
+                "dynamodb:Query",
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:BatchGetItem"
+            ],
+            "Effect": "Allow",
+            "Resource": "${DYNAMODB_ARN}"
+        },
+        {
+            "Action": [
+                "execute-api:Invoke",
+                "execute-api:ManageConnections"
+            ],
+            "Effect": "Allow",
+            "Resource": "${WS_GATEWAY_ARN}/POST/@connections/*"
+        }
+    ],
+    "Version": "2012-10-17"
+}

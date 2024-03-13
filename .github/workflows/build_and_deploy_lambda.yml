@@ -35,38 +35,64 @@ jobs:
         permissions:
             id-token: write
             contents: read
-
         steps:
             - uses: FranzDiebold/github-env-vars-action@v2.1.0
+                
+            - name: Checkout
+              uses: actions/checkout@v2
+
+            - name: Generate hash
+              id: generate-hash
+              run: |
+                ls -lha
+                echo "::set-output name=hash::$(find src/* package.json -type f -exec sha256sum {} \; | sha256sum)"      
+
+            - name: Cache lambda artifact
+              id: cache
+              uses: actions/cache@v2
+              with:
+                path: ${{ inputs.working-directory}}/lambda-artifact.zip
+                key: ${{ inputs.artifact-name }}-lambda-${{ steps.generate-hash.outputs.hash }}
+                restore-keys: |
+                  ${{ inputs.artifact-name }}-lambda-
 
             - name: Setup Node.js
+              if: steps.cache.outputs.cache-hit != 'true'
               uses: actions/setup-node@v2
               with:
                 node-version: '16'
 
-            - name: Checkout
-              uses: actions/checkout@v2
+            - name: Cache Node.js modules
+              uses: actions/cache@v2
+              if: steps.cache.outputs.cache-hit != 'true'
+              with:
+                path: ~/.npm  # npm cache files are stored in `~/.npm` on Linux/macOS
+                key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+                restore-keys: |
+                  ${{ runner.os }}-node-
 
             - name: Install dependencies
+              if: steps.cache.outputs.cache-hit != 'true'
               run: npm install
 
+            - name: Build Artifact
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: |
+                npm run build
+                zip -r ./lambda-artifact.zip ./prod ./package.json
+
             - name: Test
+              if: steps.cache.outputs.cache-hit != 'true'
               run: npm test
 
             - name: Configure AWS Credentials
+              if: steps.cache.outputs.cache-hit != 'true'
               uses: aws-actions/configure-aws-credentials@v3
               with:
                 role-to-assume: arn:aws:iam::816923827429:role/ClashBotGitHubUser
                 aws-region: ${{ inputs.region }}
 
             - name: Archive and Publish
+              if: steps.cache.outputs.cache-hit != 'true'
               run: |
-                zip -r ./${{ inputs.artifact-name}}.zip ./prod ./node_modules ./package.json
-                aws s3 cp ./event-publisher.zip s3://${{ inputs.s3-bucket-name }}/artifacts/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/${{ github.run_number }}/${{ inputs.artifact-name}}.zip
-                
-            - name: Upload Artifacts
-              uses: actions/upload-artifact@v2
-              with:
-                name: event-publisher-${{ inputs.environment-name }}-${{ github.run_number }}
-                path: ${{ inputs.working-directory}}/${{ inputs.artifact-name }}.zip
-                if-no-files-found: error
+                aws s3 cp ./lambda-artifact.zip s3://${{ inputs.s3-bucket-name }}/artifacts/${{ inputs.artifact-name}}/$(echo ${{ inputs.environment-name }} | awk '{print tolower($0)}')/artifact-${{ github.run_number }}.zip

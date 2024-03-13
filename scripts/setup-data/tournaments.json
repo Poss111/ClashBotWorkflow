@@ -1,0 +1,16 @@
+[
+    {
+      "type": "TOURNAMENT",
+      "id": "aram2022#day_3#135081",
+      "tournament": "aram2022",
+      "date": "2022-03-01T00:00:00Z",
+      "tournamentDay": "day_3"
+    },
+    {
+      "type": "TOURNAMENT",
+      "id": "aram2022#day_4#135101",
+      "tournament": "aram2022",
+      "date": "2022-03-08T00:00:00Z",
+      "tournamentDay": "day_4"
+    }
+  ]

@@ -17,7 +17,9 @@ describe('Publish an event to SQS with an event type.', () => {
         snsMock
             .on(SendMessageCommand)
             .resolvesOnce({});
+        const requestIdFromUser = "1234";
         const bodyOfRequest = {
+            uuid: requestIdFromUser,
             details: {}
         };
         const eventTwo: APIGatewayProxyEvent = createEvent(
@@ -27,14 +29,58 @@ describe('Publish an event to SQS with an event type.', () => {
         );
         const expectedEventToBeSent: EventPayload = {
             payload: bodyOfRequest,
-            uuid: eventTwo.requestContext.requestId,
+            uuid: requestIdFromUser,
             event: EVENT_TYPE.CREATE_TEAM,
             url: eventTwo.requestContext.path,
         };
         await handler(eventTwo, setupContext(), {} as any);
         await expect(snsMock).toHaveReceivedCommandWith(SendMessageCommand, {
             QueueUrl: process.env.QUEUE_URL,
-            MessageBody: JSON.stringify(expectedEventToBeSent)
+            MessageBody: JSON.stringify(expectedEventToBeSent),
+            MessageGroupId: 'event',
+            MessageDeduplicationId: requestIdFromUser
+        });
+    });
+
+    describe("Missing uuid", () => {
+
+        test('Error - If the request does not have a uuid, then return a bad request response.', async () => {
+            const snsMock = mockClient(SQSClient)
+            snsMock
+                .on(SendMessageCommand)
+                .resolvesOnce({});
+            const bodyOfRequest = {
+                details: {
+                    somebody: "somebody"
+                }
+            };
+            const eventTwo: APIGatewayProxyEvent = createEvent(
+                "/api/v2/teams",
+                "POST",
+                bodyOfRequest
+            );
+            const response = await handler(eventTwo, setupContext(), {} as any);
+            expect((response as APIGatewayProxyResult).statusCode).toBe(400);
+        });
+
+        test('Error - If the request does not have a uuid as it is an empty string, then return a bad request response.', async () => {
+            const snsMock = mockClient(SQSClient)
+            snsMock
+                .on(SendMessageCommand)
+                .resolvesOnce({});
+            const bodyOfRequest = {
+                uuid: "",
+                details: {
+                    somebody: "somebody"
+                }
+            };
+            const eventTwo: APIGatewayProxyEvent = createEvent(
+                "/api/v2/teams",
+                "POST",
+                bodyOfRequest
+            );
+            const response = await handler(eventTwo, setupContext(), {} as any);
+            expect((response as APIGatewayProxyResult).statusCode).toBe(400);
         });
     });
 
@@ -61,6 +107,7 @@ describe('Publish an event to SQS with an event type.', () => {
             .on(SendMessageCommand)
             .rejects({});
         const bodyOfRequest = {
+            uuid: "1234",
             details: {}
         };
         const eventTwo: APIGatewayProxyEvent = createEvent(
